@@ -274,7 +274,7 @@
       <input type="hidden" id="editId">
       <div class="field span2">
         <label for="fDate">날짜</label>
-        <input type="date" id="fDate" required>
+        <input type="text" id="fDate" inputmode="numeric" placeholder="YYYYMMDD" maxlength="10" required>
       </div>
       <div class="field span2">
         <label for="fTicker">종목명</label>
@@ -294,7 +294,7 @@
       </div>
       <div class="field span2">
         <label for="fPrice">단가</label>
-        <input type="number" id="fPrice" min="0" step="1" required>
+        <input type="text" id="fPrice" inputmode="numeric" placeholder="0" required>
       </div>
       <input type="hidden" id="fFee" value="0">
       <div class="field span6">
@@ -427,6 +427,11 @@ const STOCK_NAMES = [
 "고영","이오테크닉스","와이아이케이","테스","원익QnC","한화비전"
 ];
 
+// 사용자가 직접 입력했던 종목명도 자동완성 목록에 합치기 (브라우저에 저장됨)
+const CUSTOM_STOCK_KEY = 'customStockNames';
+const customStockNames = JSON.parse(localStorage.getItem(CUSTOM_STOCK_KEY) || '[]');
+customStockNames.forEach(name => { if(!STOCK_NAMES.includes(name)) STOCK_NAMES.push(name); });
+
 STOCK_NAMES.sort((a,b)=>a.localeCompare(b,'ko'));
 
 // ---------- DOM refs ----------
@@ -446,7 +451,25 @@ const toastEl = document.getElementById('toast');
 
 // 종목명 자동완성 목록 채우기
 const stockNameList = document.getElementById('stockNameList');
-stockNameList.innerHTML = STOCK_NAMES.map(name => `<option value="${name}"></option>`).join('');
+function renderStockNameList(){
+  stockNameList.innerHTML = STOCK_NAMES.map(name => `<option value="${name}"></option>`).join('');
+}
+renderStockNameList();
+
+// 새로운 종목명을 자동완성 목록에 추가 (다음부터 드롭다운에 나타남)
+function addCustomStockName(name){
+  if(!name) return;
+  if(STOCK_NAMES.includes(name)) return;
+  STOCK_NAMES.push(name);
+  STOCK_NAMES.sort((a,b)=>a.localeCompare(b,'ko'));
+  renderStockNameList();
+  const saved = JSON.parse(localStorage.getItem(CUSTOM_STOCK_KEY) || '[]');
+  if(!saved.includes(name)){
+    saved.push(name);
+    localStorage.setItem(CUSTOM_STOCK_KEY, JSON.stringify(saved));
+  }
+}
+
 
 function toast(msg){
   toastEl.textContent = msg;
@@ -647,7 +670,12 @@ function renderTable(){
     tableBody.innerHTML = `<tr class="empty-row"><td colspan="7">아직 기록이 없습니다.</td></tr>`;
     return;
   }
-  const rows = [...trades].sort((a,b)=> b.date.localeCompare(a.date));
+  // 입력한 순서(최근 저장한 기록이 위로) 기준 정렬
+  const rows = [...trades].sort((a,b)=>{
+    const at = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : Date.now();
+    const bt = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : Date.now();
+    return bt - at;
+  });
   tableBody.innerHTML = rows.map(t=>{
     const plCell = t.type==='sell'
       ? `<span class="stamp ${t.realizedPL>=0?'gain':'loss'}">
@@ -690,14 +718,44 @@ const FEE_RATE_BUY = 0.0043319;   // 매수 수수료율(%)
 const FEE_RATE_SELL = 0.0043319;  // 매도 수수료율(%)
 const TAX_RATE_SELL = 0.15;       // 매도 세금(%)
 
+const fDateInput = document.getElementById('fDate');
 const fQtyInput = document.getElementById('fQty');
 const fPriceInput = document.getElementById('fPrice');
 const fTypeInput = document.getElementById('fType');
 const fFeeInput = document.getElementById('fFee');
 
+function todayStr(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+
+// 날짜: 숫자만 입력해도 YYYY-MM-DD 형태로 자동 변환 (예: 20260818 -> 2026-08-18)
+function formatDateInput(){
+  const digits = fDateInput.value.replace(/[^0-9]/g,'').slice(0,8);
+  let formatted = digits;
+  if(digits.length > 4) formatted = digits.slice(0,4) + '-' + digits.slice(4);
+  if(digits.length > 6) formatted = digits.slice(0,4) + '-' + digits.slice(4,6) + '-' + digits.slice(6);
+  fDateInput.value = formatted;
+}
+fDateInput.addEventListener('input', formatDateInput);
+
+// 단가: 숫자만 저장하되 화면에는 천 단위 콤마로 표시
+function parseNumber(str){
+  return Number(String(str).replace(/,/g,'')) || 0;
+}
+function formatPriceInput(){
+  const raw = parseNumber(fPriceInput.value);
+  fPriceInput.value = raw ? raw.toLocaleString('ko-KR') : '';
+  autoCalcFee();
+}
+fPriceInput.addEventListener('input', formatPriceInput);
+
 function autoCalcFee(){
   const qty = Number(fQtyInput.value) || 0;
-  const price = Number(fPriceInput.value) || 0;
+  const price = parseNumber(fPriceInput.value);
   if(qty <= 0 || price <= 0) return;
   const amount = qty * price;
   const type = fTypeInput.value;
@@ -708,7 +766,7 @@ function autoCalcFee(){
   }
   fFeeInput.value = Math.round(fee);
 }
-[fQtyInput, fPriceInput, fTypeInput].forEach(el=>{
+[fQtyInput, fTypeInput].forEach(el=>{
   el.addEventListener('input', autoCalcFee);
   el.addEventListener('change', autoCalcFee);
 });
@@ -717,10 +775,12 @@ function resetForm(){
   tradeForm.reset();
   document.getElementById('editId').value = '';
   document.getElementById('fFee').value = 0;
+  fDateInput.value = todayStr(); // 날짜는 오늘 날짜를 기본값으로
   submitBtn.textContent = '기록 저장';
   cancelEditBtn.style.display = 'none';
 }
 cancelEditBtn.addEventListener('click', resetForm);
+fDateInput.value = todayStr(); // 최초 로드 시에도 오늘 날짜로 채워둠
 
 function startEdit(id){
   const t = trades.find(x=>x.id===id);
@@ -730,7 +790,7 @@ function startEdit(id){
   document.getElementById('fTicker').value = t.ticker;
   document.getElementById('fType').value = t.type;
   document.getElementById('fQty').value = t.quantity;
-  document.getElementById('fPrice').value = t.price;
+  document.getElementById('fPrice').value = Number(t.price).toLocaleString('ko-KR');
   document.getElementById('fFee').value = t.fee||0; // 기존 기록은 저장된 수수료 값을 그대로 표시 (자동계산으로 덮어쓰지 않음)
   document.getElementById('fMemo').value = t.memo||'';
   submitBtn.textContent = '수정 저장';
@@ -754,12 +814,18 @@ tradeForm.addEventListener('submit', async (e)=>{
   e.preventDefault();
   if(!currentUser){ toast('로그인이 필요합니다'); return; }
 
+  const dateVal = document.getElementById('fDate').value;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(dateVal)){
+    toast('날짜를 YYYYMMDD 형식으로 정확히 입력하세요');
+    return;
+  }
+
   const payload = {
-    date: document.getElementById('fDate').value,
+    date: dateVal,
     ticker: document.getElementById('fTicker').value.trim(),
     type: document.getElementById('fType').value,
     quantity: Number(document.getElementById('fQty').value),
-    price: Number(document.getElementById('fPrice').value),
+    price: parseNumber(document.getElementById('fPrice').value),
     fee: Number(document.getElementById('fFee').value)||0,
     memo: document.getElementById('fMemo').value.trim()
   };
@@ -773,6 +839,7 @@ tradeForm.addEventListener('submit', async (e)=>{
       await addDoc(tradesCol, { ...payload, createdAt: serverTimestamp() });
       toast('기록이 저장되었습니다');
     }
+    addCustomStockName(payload.ticker);
     resetForm();
   }catch(e){
     console.error(e);
