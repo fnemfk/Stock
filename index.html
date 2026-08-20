@@ -714,38 +714,60 @@ function renderPeriodTable(sells){
 // ---------- 실시간 시세 조회 (네이버 금융, 비공식 API) ----------
 // 직접 호출이 CORS로 막히면 공개 프록시(allorigins)로 한 번 더 시도합니다.
 async function fetchCurrentPrices(codes){
-  if(!codes.length) return {};
+  if(!codes.length) return { prices:{}, error:null };
   const codeParam = codes.join(',');
   const targetUrl = `https://polling.finance.naver.com/api/realtime/domestic/stock/${codeParam}`;
 
   async function tryFetch(url){
     const res = await fetch(url);
-    if(!res.ok) throw new Error('bad response');
+    if(!res.ok) throw new Error('HTTP ' + res.status);
     return res.json();
   }
 
-  let json;
+  let json = null;
+  let lastError = null;
+
+  // 1차: 직접 호출
   try{
     json = await tryFetch(targetUrl);
   }catch(e1){
+    lastError = e1;
+    console.warn('[시세] 직접 호출 실패, 프록시로 재시도', e1);
+    // 2차: allorigins 프록시
     try{
-      const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
-      json = await tryFetch(proxyUrl);
+      const proxyUrl1 = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
+      json = await tryFetch(proxyUrl1);
+      lastError = null;
     }catch(e2){
-      console.error('시세 조회 실패', e2);
-      return {};
+      lastError = e2;
+      console.warn('[시세] allorigins 프록시도 실패, corsproxy로 재시도', e2);
+      // 3차: corsproxy.io 프록시
+      try{
+        const proxyUrl2 = 'https://corsproxy.io/?url=' + encodeURIComponent(targetUrl);
+        json = await tryFetch(proxyUrl2);
+        lastError = null;
+      }catch(e3){
+        lastError = e3;
+        console.error('[시세] 모든 시도 실패', e3);
+      }
     }
   }
 
+  if(lastError || !json){
+    return { prices:{}, error:'fetch_failed' };
+  }
+
+  console.log('[시세] 응답 원본', json); // 문제 진단용: F12 콘솔에서 구조 확인 가능
+
   const map = {};
-  const list = (json && json.datas) || [];
+  const list = (json && (json.datas || json.result || [])) || [];
   list.forEach(d=>{
-    const code = d.itemCode || d.code;
-    const priceRaw = d.closePrice;
+    const code = d.itemCode || d.code || d.cd;
+    const priceRaw = d.closePrice ?? d.nv ?? d.close_val;
     const price = Number(String(priceRaw).replace(/,/g,'')) || 0;
     if(code) map[code] = price;
   });
-  return map;
+  return { prices: map, error: null };
 }
 
 function renderHoldings(holdings, totalPL){
@@ -767,7 +789,7 @@ function renderHoldings(holdings, totalPL){
   // 우선 매입단가 기준으로 즉시 표시하고, 시세 조회가 끝나면 현재가로 갱신
   const codes = [...new Set(rows.map(([ticker])=> STOCK_CODES[ticker]).filter(Boolean))];
 
-  function draw(priceMap){
+  function draw(priceMap, fetchError){
     let totalValuation = 0;
     tbody.innerHTML = rows.map(([ticker, h])=>{
       const qty = Math.round(h.qty);
@@ -778,9 +800,16 @@ function renderHoldings(holdings, totalPL){
       totalValuation += valuation;
       const valuationPL = currentPrice !== null ? (currentPrice - h.avgPrice) * qty : null;
 
-      const priceCell = currentPrice !== null
-        ? fmt(currentPrice)
-        : `<span style="color:var(--ink-muted);">코드없음</span>`;
+      let priceCell;
+      if(currentPrice !== null){
+        priceCell = fmt(currentPrice);
+      } else if(!code){
+        priceCell = `<span style="color:var(--ink-muted);">코드없음</span>`;
+      } else if(fetchError){
+        priceCell = `<span style="color:var(--ink-muted);">조회실패</span>`;
+      } else {
+        priceCell = `<span style="color:var(--ink-muted);">응답없음</span>`;
+      }
       const plCell = valuationPL !== null
         ? `<span class="stamp ${valuationPL>=0?'gain':'loss'}"><span class="mark">${valuationPL>=0?'益':'損'}</span>${fmt(valuationPL)}</span>`
         : `<span style="color:var(--ink-muted);">—</span>`;
@@ -801,10 +830,10 @@ function renderHoldings(holdings, totalPL){
     statTotalAssets.className = 'value mono ' + (totalAssets>0?'gain':totalAssets<0?'loss':'');
   }
 
-  draw({}); // 매입단가 기준으로 우선 표시 (조회 지연 대비)
+  draw({}, false); // 매입단가 기준으로 우선 표시 (조회 지연 대비)
 
   if(codes.length){
-    fetchCurrentPrices(codes).then(draw);
+    fetchCurrentPrices(codes).then(({prices, error})=> draw(prices, error));
   }
 }
 
