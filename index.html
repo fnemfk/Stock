@@ -131,6 +131,23 @@
   }
   .section-head .rule{flex:1;height:3px;background-image:radial-gradient(circle, var(--rule-strong) 1.5px, transparent 1.5px);background-size:8px 3px;background-repeat:repeat-x;}
 
+  /* 매매 기록 제목 옆 날짜 검색 */
+  .record-list-head{flex-wrap:wrap;row-gap:10px;}
+  .date-search-group{
+    display:flex;align-items:center;gap:8px;flex-wrap:nowrap;
+  }
+  .date-search-group label{font-size:12px;color:var(--ink-muted);white-space:nowrap;}
+  .date-search-group input[type="date"]{
+    background:#fff;border:2px solid var(--rule-strong);color:var(--ink);
+    padding:7px 10px;font-size:13px;border-radius:12px;font-family:'Gowun Dodum', sans-serif;
+    width:150px;max-width:100%;
+  }
+  @media (max-width:600px){
+    .record-list-head .rule{display:none;} /* 좁은 화면에서는 점선 대신 줄바꿈으로 정리 */
+    .date-search-group{width:100%;}
+    .date-search-group input[type="date"]{flex:1;width:auto;min-width:0;}
+  }
+
   /* ---------- Stat cards ---------- */
   .stats{
     display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
@@ -174,10 +191,12 @@
     padding:12px 10px;border-bottom:2px solid var(--rule-strong);
     background:var(--panel-2);
     letter-spacing:0.02em;
+    white-space:nowrap;
   }
   tbody td{
     padding:13px 10px;border-bottom:1px solid var(--rule);
     font-family:'Gowun Dodum', sans-serif;
+    white-space:nowrap;
   }
   tbody tr:last-child td{border-bottom:none;}
   tbody tr:hover{background:rgba(124,179,66,0.08);}
@@ -186,6 +205,7 @@
   .ticker-link{cursor:pointer;text-decoration:underline;text-decoration-color:transparent;transition:text-decoration-color .15s;}
   .ticker-link:hover{text-decoration-color:var(--gold);color:#b8860b;}
   .side-badge{
+    display:inline-block;white-space:nowrap;
     font-family:'Gowun Dodum', sans-serif;font-size:12px;padding:4px 11px;border-radius:999px;
   }
   .side-badge.buy{color:#fff;background:var(--gain);}
@@ -337,11 +357,13 @@
     </div>
 
     <!-- 기록 목록 -->
-    <div class="section-head" style="align-items:center;flex-wrap:wrap;row-gap:10px;">
+    <div class="section-head record-list-head">
       <span class="eyebrow">03</span><h2>매매 기록</h2><span class="rule"></span>
-      <label for="dateSearchInput" style="font-size:12px;color:var(--ink-muted);white-space:nowrap;">날짜 검색</label>
-      <input type="date" id="dateSearchInput" style="background:#fff;border:2px solid var(--rule-strong);color:var(--ink);padding:7px 10px;font-size:13px;border-radius:12px;font-family:'Gowun Dodum', sans-serif;">
-      <button type="button" class="btn small" id="dateSearchClearBtn">전체보기</button>
+      <div class="date-search-group">
+        <label for="dateSearchInput">날짜 검색</label>
+        <input type="date" id="dateSearchInput">
+        <button type="button" class="btn small" id="dateSearchClearBtn">전체보기</button>
+      </div>
     </div>
     <div class="table-scroll">
     <table class="table-wide">
