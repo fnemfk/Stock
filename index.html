@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>매매일지 — 실현손익 기록</title>
+<title>기록장</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700;900&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
   :root{
@@ -28,24 +28,24 @@
       radial-gradient(ellipse 900px 500px at 50% -10%, rgba(165,120,15,0.05), transparent),
       var(--bg);
     color:var(--ink);
-    font-family:'Noto Sans KR', system-ui, sans-serif;
+    font-family:'Nanum Gothic', system-ui, sans-serif;
     min-height:100vh;
     letter-spacing:0.01em;
   }
-  .mono{font-family:'IBM Plex Mono', monospace;}
-  .serif{font-family:'Noto Serif KR', serif;}
+  .mono{font-family:'Nanum Gothic', sans-serif;}
+  .serif{font-family:'Nanum Gothic', sans-serif;}
 
   .wrap{max-width:1040px;margin:0 auto;padding:0 20px 80px;}
 
   /* ---------- Header ---------- */
   header{
-    padding:44px 0 22px;
+    padding:20px 0 16px;
     border-bottom:1px solid var(--rule-strong);
-    display:flex;justify-content:space-between;align-items:flex-end;gap:16px;
+    display:flex;justify-content:flex-end;align-items:center;gap:16px;
     flex-wrap:wrap;
   }
   header .title-block h1{
-    font-family:'Noto Serif KR', serif;
+    font-family:'Nanum Gothic', sans-serif;
     font-weight:900;
     font-size:clamp(28px,4vw,40px);
     margin:0 0 6px;
@@ -53,7 +53,7 @@
   }
   header .title-block p{
     margin:0;color:var(--ink-muted);font-size:13px;
-    font-family:'IBM Plex Mono', monospace;
+    font-family:'Nanum Gothic', sans-serif;
   }
   #authArea{display:flex;align-items:center;gap:10px;font-size:13px;}
   .btn{
@@ -62,7 +62,7 @@
     color:var(--ink);
     padding:9px 16px;
     font-size:13px;
-    font-family:'Noto Sans KR', sans-serif;
+    font-family:'Nanum Gothic', sans-serif;
     border-radius:var(--radius);
     cursor:pointer;
     transition:border-color .15s, color .15s;
@@ -82,10 +82,10 @@
     display:flex;align-items:baseline;gap:12px;margin:56px 0 20px;
   }
   .section-head .eyebrow{
-    font-family:'IBM Plex Mono', monospace;color:var(--gold);font-size:12px;letter-spacing:0.12em;
+    font-family:'Nanum Gothic', sans-serif;color:var(--gold);font-size:12px;letter-spacing:0.12em;
   }
   .section-head h2{
-    font-family:'Noto Serif KR', serif;font-size:20px;margin:0;font-weight:700;
+    font-family:'Nanum Gothic', sans-serif;font-size:20px;margin:0;font-weight:700;
   }
   .section-head .rule{flex:1;height:1px;background:var(--rule);}
 
@@ -99,8 +99,8 @@
     background:var(--panel);
     padding:22px 18px;
   }
-  .stat .label{font-size:12px;color:var(--ink-muted);margin-bottom:10px;font-family:'IBM Plex Mono',monospace;}
-  .stat .value{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;}
+  .stat .label{font-size:12px;color:var(--ink-muted);margin-bottom:10px;font-family:'Nanum Gothic', sans-serif;}
+  .stat .value{font-family:'Nanum Gothic', sans-serif;font-size:24px;font-weight:600;}
   .stat .value.gain{color:var(--gain);}
   .stat .value.loss{color:var(--loss);}
   @media (max-width:700px){ .stats{grid-template-columns:repeat(2,1fr);} }
@@ -108,7 +108,7 @@
   /* ---------- Charts ---------- */
   .charts{display:grid;grid-template-columns:1.3fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule);}
   .chart-card{background:var(--panel);padding:20px;}
-  .chart-card h3{margin:0 0 14px;font-size:13px;font-weight:500;color:var(--ink-muted);font-family:'IBM Plex Mono',monospace;}
+  .chart-card h3{margin:0 0 14px;font-size:13px;font-weight:500;color:var(--ink-muted);font-family:'Nanum Gothic', sans-serif;}
   .chart-card canvas{max-height:260px;}
   @media (max-width:760px){ .charts{grid-template-columns:1fr;} }
 
@@ -116,19 +116,19 @@
   table{width:100%;border-collapse:collapse;font-size:14px;}
   thead th{
     text-align:left;font-weight:500;color:var(--ink-muted);
-    font-size:12px;font-family:'IBM Plex Mono',monospace;
+    font-size:12px;font-family:'Nanum Gothic', sans-serif;
     padding:10px 10px;border-bottom:1px solid var(--rule-strong);
     letter-spacing:0.04em;
   }
   tbody td{
     padding:13px 10px;border-bottom:1px solid var(--rule);
-    font-family:'IBM Plex Mono', monospace;
+    font-family:'Nanum Gothic', sans-serif;
   }
   tbody tr:hover{background:rgba(20,18,14,0.035);}
   td.num{text-align:right;}
-  .ticker-cell{font-family:'Noto Sans KR', sans-serif;}
+  .ticker-cell{font-family:'Nanum Gothic', sans-serif;}
   .side-badge{
-    font-family:'Noto Sans KR', sans-serif;font-size:12px;padding:3px 8px;border-radius:2px;
+    font-family:'Nanum Gothic', sans-serif;font-size:12px;padding:3px 8px;border-radius:2px;
   }
   .side-badge.buy{color:var(--gain);border:1px solid var(--gain);}
   .side-badge.sell{color:var(--loss);border:1px solid var(--loss);}
@@ -136,20 +136,20 @@
   /* ---- 도장 스탬프 (실현손익 표시) ---- */
   .stamp{
     display:inline-flex;align-items:center;gap:6px;
-    font-family:'IBM Plex Mono', monospace;font-weight:600;font-size:13px;
+    font-family:'Nanum Gothic', sans-serif;font-weight:600;font-size:13px;
   }
   .stamp .mark{
     width:22px;height:22px;border-radius:50%;
     border:1.6px solid currentColor;
     display:inline-flex;align-items:center;justify-content:center;
-    font-family:'Noto Serif KR', serif;font-size:12px;font-weight:900;
+    font-family:'Nanum Gothic', sans-serif;font-size:12px;font-weight:900;
     transform:rotate(-8deg);
     opacity:0.9;
   }
   .stamp.gain{color:var(--gain);}
   .stamp.loss{color:var(--loss);}
 
-  .empty-row td{color:var(--ink-muted);text-align:center;padding:36px 0;font-family:'Noto Sans KR',sans-serif;}
+  .empty-row td{color:var(--ink-muted);text-align:center;padding:36px 0;font-family:'Nanum Gothic', sans-serif;}
 
   /* ---------- Owner form ---------- */
   #ownerPanel{display:none;}
@@ -159,10 +159,10 @@
     background:var(--panel-2);border:1px solid var(--rule);padding:20px;
   }
   .form-grid .field{display:flex;flex-direction:column;gap:6px;}
-  .form-grid label{font-size:11px;color:var(--ink-muted);font-family:'IBM Plex Mono',monospace;}
+  .form-grid label{font-size:11px;color:var(--ink-muted);font-family:'Nanum Gothic', sans-serif;}
   .form-grid input, .form-grid select, .form-grid textarea{
     background:transparent;border:1px solid var(--rule-strong);color:var(--ink);
-    padding:9px 10px;font-size:13px;font-family:'IBM Plex Mono', monospace;border-radius:var(--radius);
+    padding:9px 10px;font-size:13px;font-family:'Nanum Gothic', sans-serif;border-radius:var(--radius);
   }
   .form-grid .span2{grid-column:span 2;}
   .form-grid .span3{grid-column:span 3;}
@@ -174,7 +174,7 @@
   .form-actions{margin-top:14px;display:flex;gap:10px;justify-content:flex-end;}
   .row-actions button{
     background:none;border:none;color:var(--ink-muted);cursor:pointer;font-size:12px;
-    font-family:'IBM Plex Mono',monospace;text-decoration:underline;padding:0;margin-right:10px;
+    font-family:'Nanum Gothic', sans-serif;text-decoration:underline;padding:0;margin-right:10px;
   }
   .row-actions button:hover{color:var(--gold);}
 
@@ -187,12 +187,12 @@
   .modal{
     background:var(--panel);border:1px solid var(--rule-strong);padding:28px;width:min(340px,90vw);
   }
-  .modal h3{margin:0 0 18px;font-family:'Noto Serif KR',serif;font-size:18px;}
+  .modal h3{margin:0 0 18px;font-family:'Nanum Gothic', sans-serif;font-size:18px;}
   .modal .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
   .modal label{font-size:12px;color:var(--ink-muted);}
   .modal input{
     background:transparent;border:1px solid var(--rule-strong);color:var(--ink);
-    padding:10px;border-radius:var(--radius);font-family:'IBM Plex Mono',monospace;
+    padding:10px;border-radius:var(--radius);font-family:'Nanum Gothic', sans-serif;
   }
   .modal .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:6px;}
   .modal .error{color:var(--gain);font-size:12px;margin-top:10px;min-height:16px;}
@@ -205,17 +205,13 @@
   }
   .toast.visible{opacity:1;}
 
-  footer{margin-top:70px;padding-top:20px;border-top:1px solid var(--rule);color:var(--ink-muted);font-size:12px;font-family:'IBM Plex Mono',monospace;}
+  footer{margin-top:70px;padding-top:20px;border-top:1px solid var(--rule);color:var(--ink-muted);font-size:12px;font-family:'Nanum Gothic', sans-serif;}
 </style>
 </head>
 <body>
 
 <div class="wrap">
   <header>
-    <div class="title-block">
-      <h1>매매일지</h1>
-      <p>REALIZED P/L LEDGER — 공개 열람 가능</p>
-    </div>
     <div id="authArea">
       <span id="authStatus" class="mono" style="color:var(--ink-muted);"></span>
       <button class="btn small" id="loginBtn">로그인</button>
@@ -257,9 +253,39 @@
     </div>
   </div>
 
+  <!-- 현재 보유 종목 -->
+  <div class="section-head"><span class="eyebrow">03</span><h2>현재 보유 종목</h2><span class="rule"></span></div>
+  <table>
+    <thead>
+      <tr>
+        <th>종목</th><th class="num">보유수량</th><th class="num">평균단가</th><th class="num">매입금액</th>
+      </tr>
+    </thead>
+    <tbody id="holdingsTableBody">
+      <tr class="empty-row"><td colspan="4">불러오는 중...</td></tr>
+    </tbody>
+  </table>
+
   <!-- 기록 추가 (로그인 시에만 표시) -->
   <div id="ownerPanel">
-    <div class="section-head"><span class="eyebrow">03</span><h2>기록 추가</h2><span class="rule"></span></div>
+    <div class="section-head"><span class="eyebrow">04</span><h2>기록 추가</h2><span class="rule"></span></div>
+
+    <div id="feeRateSettings" style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;font-size:12px;color:var(--ink-muted);">
+      <div class="field" style="max-width:140px;">
+        <label for="feeRateBuy">매수 수수료율(%)</label>
+        <input type="number" id="feeRateBuy" min="0" step="0.0000001" value="0.0043319">
+      </div>
+      <div class="field" style="max-width:140px;">
+        <label for="feeRateSell">매도 수수료율(%)</label>
+        <input type="number" id="feeRateSell" min="0" step="0.0000001" value="0.0043319">
+      </div>
+      <div class="field" style="max-width:140px;">
+        <label for="taxRateSell">매도 세금(%)</label>
+        <input type="number" id="taxRateSell" min="0" step="0.001" value="0.15">
+      </div>
+      <div style="align-self:center;">나무증권 우대수수료 기준(코스피·코스닥·코넥스 0.0043319%, 매도세 0.15%)으로 기본 설정했어요. ETF/ETN/ELW는 0.0049010%로 직접 조정하세요.</div>
+    </div>
+
     <form id="tradeForm" class="form-grid">
       <input type="hidden" id="editId">
       <div class="field span2">
@@ -268,7 +294,8 @@
       </div>
       <div class="field span2">
         <label for="fTicker">종목명</label>
-        <input type="text" id="fTicker" placeholder="예: 삼성전자" required>
+        <input type="text" id="fTicker" list="stockNameList" placeholder="종목명 입력 (예: 삼성전자)" autocomplete="off" required>
+        <datalist id="stockNameList"></datalist>
       </div>
       <div class="field span2">
         <label for="fType">구분</label>
@@ -286,7 +313,7 @@
         <input type="number" id="fPrice" min="0" step="1" required>
       </div>
       <div class="field span2">
-        <label for="fFee">수수료</label>
+        <label for="fFee">수수료 (자동계산)</label>
         <input type="number" id="fFee" min="0" step="1" value="0">
       </div>
       <div class="field span6">
@@ -301,7 +328,7 @@
   </div>
 
   <!-- 기록 목록 -->
-  <div class="section-head"><span class="eyebrow">04</span><h2>매매 기록</h2><span class="rule"></span></div>
+  <div class="section-head"><span class="eyebrow">05</span><h2>매매 기록</h2><span class="rule"></span></div>
   <table>
     <thead>
       <tr>
@@ -314,7 +341,7 @@
     </tbody>
   </table>
 
-  <footer>Firebase Firestore 기반 · 조회는 누구나 가능, 기록 작성은 계정 소유자만 가능합니다.</footer>
+  <footer>기록은 본인 계정으로 로그인해야 추가/수정할 수 있습니다.</footer>
 </div>
 
 <!-- 로그인 모달 -->
@@ -372,6 +399,55 @@ let currentUser = null;
 let trades = [];
 let cumulativeChart, tickerChart;
 
+// ---------- 종목명 자동완성 목록 (국내 코스피/코스닥 주요 종목) ----------
+// 실시간 상장목록이 아닌 자주 거래되는 종목 위주의 정적 목록입니다.
+// 목록에 없는 종목명도 직접 입력해서 저장할 수 있습니다.
+const STOCK_NAMES = [
+"삼성전자","삼성전자우","SK하이닉스","LG에너지솔루션","삼성바이오로직스","현대차","기아","셀트리온",
+"POSCO홀딩스","NAVER","카카오","LG화학","삼성SDI","KB금융","신한지주","현대모비스","삼성물산",
+"하나금융지주","SK이노베이션","LG전자","POSCO퓨처엠","SK","한국전력","삼성생명","우리금융지주",
+"SKC","SK텔레콤","KT&G","KT","한화솔루션","삼성전기","LG생활건강","현대제철","고려아연","S-Oil",
+"두산에너빌리티","한온시스템","LG","GS","한화에어로스페이스","현대중공업","HD한국조선해양","롯데케미칼",
+"아모레퍼시픽","한미약품","유한양행","녹십자","종근당","동아에스티","일동제약","대웅제약",
+"메리츠금융지주","삼성화재","DB손해보험","현대해상","삼성카드","미래에셋증권","NH투자증권","키움증권",
+"한국금융지주","삼성증권","교보증권","현대차증권","BNK금융지주","DGB금융지주","JB금융지주",
+"카카오뱅크","카카오페이","크래프톤","엔씨소프트","넷마블","펄어비스","컴투스","카카오게임즈",
+"두산밥캣","두산","현대건설","GS건설","대우건설","DL이앤씨","HDC현대산업개발","삼성엔지니어링",
+"현대엘리베이터","포스코인터내셔널","현대글로비스","팬오션","HMM","대한항공","아시아나항공","진에어",
+"CJ대한통운","한진칼","롯데지주","신세계","이마트","현대백화점","BGF리테일","GS리테일","롯데쇼핑",
+"오리온","농심","롯데칠성","하이트진로","CJ제일제당","동원산업","대상","삼양식품","빙그레",
+"LG디스플레이","LX세미콘","DB하이텍","리노공업","한미반도체","이오테크닉스","원익IPS","솔브레인",
+"에코프로","에코프로비엠","에코프로머티","포스코엠텍","포스코스틸리온","LS","LS전선아시아","LS ELECTRIC",
+"한국타이어앤테크놀로지","금호타이어","한온시스템","만도","에스엘","현대위아","한국항공우주","LIG넥스원",
+"현대로템","한화시스템","한화오션","삼성중공업","STX엔진","한국조선해양","현대미포조선",
+"셀트리온헬스케어","셀트리온제약","알테오젠","HLB","레고켐바이오","메드팩토","에이비엘바이오",
+"펩트론","리가켐바이오","클래시스","루닛","뷰노","셀바스AI","삼천당제약","휴젤","메디톡스",
+"엘앤씨바이오","코오롱생명과학","JW중외제약","한독","보령","제일약품","동국제약","동화약품",
+"카카오브레인","솔데스크","와이지엔터테인먼트","에스엠","JYP Ent.","하이브","스튜디오드래곤",
+"CJ ENM","CJ CGV","키다리스튜디오","디앤씨미디어","콘텐트리중앙",
+"삼성에스디에스","삼성엔지니어링","포스코DX","현대오토에버","SK스퀘어","SK바이오사이언스",
+"SK바이오팜","SK가스","SK디스커버리","SK디앤디","SK네트웍스","SKC솔믹스","한화솔루션",
+"한화생명","한화투자증권","한화손해보험","한화갤러리아","한화호텔앤드리조트",
+"두산퓨얼셀","두산테스나","두산로보틱스","한국항공우주산업","현대에너지솔루션","OCI홀딩스",
+"OCI","한화큐셀","코스모신소재","포스코케미칼","엘앤에프","천보","코스모화학",
+"씨아이에스","성일하이텍","에코프로에이치엔","이엔플러스","윤성에프앤씨",
+"NAVER제트","다날","웹젠","위메이드","넥슨게임즈","네오위즈","조이시티","드래곤플라이",
+"안랩","한글과컴퓨터","더존비즈온","티맥스소프트","한컴위드","엔에이치엔",
+"파마리서치","코오롱인더","코오롱글로벌","코오롱ENP","티에스이","이수페타시스","비에이치",
+"삼익THK","성우하이텍","화신","동원시스템즈","동원F&B","하림","마니커","체리부로",
+"KG케미칼","KG모빌리티","KG스틸","한국앤컴퍼니","넥센타이어","넥센",
+"메가스터디교육","메가스터디","YBM넷","이룸교육","크레버스","웅진씽크빅","교원",
+"에스원","KT텔레캅","캠코",
+"쿠팡","마켓컬리","오늘의집","당근마켓",
+"카카오모빌리티","티맵모빌리티","우아한형제들",
+"신라젠","앱클론","지놈앤컴퍼니","네오이뮨텍","박셀바이오","오스코텍",
+"에스디바이오센서","씨젠","랩지노믹스","바이오니아","제노포커스",
+"파크시스템스","텔레칩스","실리콘투","리노스","엘오티베큠",
+"고영","이오테크닉스","와이아이케이","테스","원익QnC","한화비전"
+];
+
+STOCK_NAMES.sort((a,b)=>a.localeCompare(b,'ko'));
+
 // ---------- DOM refs ----------
 const authStatus = document.getElementById('authStatus');
 const loginBtn = document.getElementById('loginBtn');
@@ -386,6 +462,10 @@ const cancelEditBtn = document.getElementById('cancelEditBtn');
 const submitBtn = document.getElementById('submitBtn');
 const tableBody = document.getElementById('tradeTableBody');
 const toastEl = document.getElementById('toast');
+
+// 종목명 자동완성 목록 채우기
+const stockNameList = document.getElementById('stockNameList');
+stockNameList.innerHTML = STOCK_NAMES.map(name => `<option value="${name}"></option>`).join('');
 
 function toast(msg){
   toastEl.textContent = msg;
@@ -491,11 +571,11 @@ function computeMetrics(list){
     enriched.push({ ...t, realizedPL });
   });
 
-  return { enriched, cumSeries, totalPL: cumPL };
+  return { enriched, cumSeries, totalPL: cumPL, holdings };
 }
 
 function computeAndRender(){
-  const { enriched, cumSeries, totalPL } = computeMetrics(trades);
+  const { enriched, cumSeries, totalPL, holdings } = computeMetrics(trades);
   trades = enriched;
 
   const sells = enriched.filter(t=>t.type==='sell');
@@ -511,7 +591,32 @@ function computeAndRender(){
   document.getElementById('statAvgPL').className = 'value mono ' + (avgPL>0?'gain':avgPL<0?'loss':'');
 
   renderCharts(cumSeries, sells);
+  renderHoldings(holdings);
   renderTable();
+}
+
+function renderHoldings(holdings){
+  const rows = Object.entries(holdings)
+    .filter(([ticker, h]) => Math.round(h.qty) > 0)
+    .sort((a,b) => a[0].localeCompare(b[0], 'ko'));
+
+  const tbody = document.getElementById('holdingsTableBody');
+
+  if(!rows.length){
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="4">현재 보유 중인 종목이 없습니다.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(([ticker, h])=>{
+    const qty = Math.round(h.qty);
+    const amount = h.avgCost * qty;
+    return `<tr>
+      <td class="ticker-cell">${escapeHtml(ticker)}</td>
+      <td class="num">${fmt(qty)}</td>
+      <td class="num">${fmt(h.avgCost)}</td>
+      <td class="num">${fmt(amount)}</td>
+    </tr>`;
+  }).join('');
 }
 
 function renderCharts(cumSeries, sells){
@@ -599,6 +704,44 @@ function escapeHtml(s){
 }
 
 // ---------- Form (owner only) ----------
+
+// 수수료율 설정 저장/불러오기 (브라우저에 저장, 본인 증권사 요율에 맞게 조정 가능)
+const feeRateBuyInput = document.getElementById('feeRateBuy');
+const feeRateSellInput = document.getElementById('feeRateSell');
+const taxRateSellInput = document.getElementById('taxRateSell');
+const fQtyInput = document.getElementById('fQty');
+const fPriceInput = document.getElementById('fPrice');
+const fTypeInput = document.getElementById('fType');
+const fFeeInput = document.getElementById('fFee');
+
+['feeRateBuy','feeRateSell','taxRateSell'].forEach(key=>{
+  const saved = localStorage.getItem(key);
+  if(saved !== null) document.getElementById(key).value = saved;
+  document.getElementById(key).addEventListener('change', ()=>{
+    localStorage.setItem(key, document.getElementById(key).value);
+    autoCalcFee();
+  });
+});
+
+function autoCalcFee(){
+  const qty = Number(fQtyInput.value) || 0;
+  const price = Number(fPriceInput.value) || 0;
+  if(qty <= 0 || price <= 0) return;
+  const amount = qty * price;
+  const type = fTypeInput.value;
+  const commissionRate = Number(type==='buy' ? feeRateBuyInput.value : feeRateSellInput.value) || 0;
+  let fee = amount * commissionRate / 100;
+  if(type === 'sell'){
+    const taxRate = Number(taxRateSellInput.value) || 0;
+    fee += amount * taxRate / 100;
+  }
+  fFeeInput.value = Math.round(fee);
+}
+[fQtyInput, fPriceInput, fTypeInput].forEach(el=>{
+  el.addEventListener('input', autoCalcFee);
+  el.addEventListener('change', autoCalcFee);
+});
+
 function resetForm(){
   tradeForm.reset();
   document.getElementById('editId').value = '';
@@ -617,7 +760,7 @@ function startEdit(id){
   document.getElementById('fType').value = t.type;
   document.getElementById('fQty').value = t.quantity;
   document.getElementById('fPrice').value = t.price;
-  document.getElementById('fFee').value = t.fee||0;
+  document.getElementById('fFee').value = t.fee||0; // 기존 기록은 저장된 수수료 값을 그대로 표시 (자동계산으로 덮어쓰지 않음)
   document.getElementById('fMemo').value = t.memo||'';
   submitBtn.textContent = '수정 저장';
   cancelEditBtn.style.display = 'inline-block';
