@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>매매일지 — 실현손익 기록</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700;900&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#fdfcfa;
+    --panel:#ffffff;
+    --panel-2:#f6f4ef;
+    --rule: rgba(20,18,14,0.10);
+    --rule-strong: rgba(20,18,14,0.28);
+    --ink:#1a1712;
+    --ink-muted:#6b6f76;
+    --gold:#a5780f;
+    --gain:#c1392b;   /* 상승/이익 = 빨강 (국내 관행) */
+    --loss:#25628f;   /* 하락/손실 = 파랑 */
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(165,120,15,0.05), transparent),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Noto Sans KR', system-ui, sans-serif;
+    min-height:100vh;
+    letter-spacing:0.01em;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  .serif{font-family:'Noto Serif KR', serif;}
+
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px 80px;}
+
+  /* ---------- Header ---------- */
+  header{
+    padding:44px 0 22px;
+    border-bottom:1px solid var(--rule-strong);
+    display:flex;justify-content:space-between;align-items:flex-end;gap:16px;
+    flex-wrap:wrap;
+  }
+  header .title-block h1{
+    font-family:'Noto Serif KR', serif;
+    font-weight:900;
+    font-size:clamp(28px,4vw,40px);
+    margin:0 0 6px;
+    letter-spacing:0.02em;
+  }
+  header .title-block p{
+    margin:0;color:var(--ink-muted);font-size:13px;
+    font-family:'IBM Plex Mono', monospace;
+  }
+  #authArea{display:flex;align-items:center;gap:10px;font-size:13px;}
+  .btn{
+    background:transparent;
+    border:1px solid var(--rule-strong);
+    color:var(--ink);
+    padding:9px 16px;
+    font-size:13px;
+    font-family:'Noto Sans KR', sans-serif;
+    border-radius:var(--radius);
+    cursor:pointer;
+    transition:border-color .15s, color .15s;
+  }
+  .btn:hover{border-color:var(--gold);color:var(--gold);}
+  .btn.primary{
+    background:var(--gold);border-color:var(--gold);color:#1a1406;font-weight:700;
+  }
+  .btn.primary:hover{filter:brightness(1.08);color:#1a1406;}
+  .btn.small{padding:6px 12px;font-size:12px;}
+  .btn:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{
+    outline:2px solid var(--gold); outline-offset:2px;
+  }
+
+  /* ---------- Section headings ---------- */
+  .section-head{
+    display:flex;align-items:baseline;gap:12px;margin:56px 0 20px;
+  }
+  .section-head .eyebrow{
+    font-family:'IBM Plex Mono', monospace;color:var(--gold);font-size:12px;letter-spacing:0.12em;
+  }
+  .section-head h2{
+    font-family:'Noto Serif KR', serif;font-size:20px;margin:0;font-weight:700;
+  }
+  .section-head .rule{flex:1;height:1px;background:var(--rule);}
+
+  /* ---------- Stat cards ---------- */
+  .stats{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+    background:var(--rule);
+    border:1px solid var(--rule);
+  }
+  .stat{
+    background:var(--panel);
+    padding:22px 18px;
+  }
+  .stat .label{font-size:12px;color:var(--ink-muted);margin-bottom:10px;font-family:'IBM Plex Mono',monospace;}
+  .stat .value{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;}
+  .stat .value.gain{color:var(--gain);}
+  .stat .value.loss{color:var(--loss);}
+  @media (max-width:700px){ .stats{grid-template-columns:repeat(2,1fr);} }
+
+  /* ---------- Charts ---------- */
+  .charts{display:grid;grid-template-columns:1.3fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule);}
+  .chart-card{background:var(--panel);padding:20px;}
+  .chart-card h3{margin:0 0 14px;font-size:13px;font-weight:500;color:var(--ink-muted);font-family:'IBM Plex Mono',monospace;}
+  .chart-card canvas{max-height:260px;}
+  @media (max-width:760px){ .charts{grid-template-columns:1fr;} }
+
+  /* ---------- Ledger table ---------- */
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  thead th{
+    text-align:left;font-weight:500;color:var(--ink-muted);
+    font-size:12px;font-family:'IBM Plex Mono',monospace;
+    padding:10px 10px;border-bottom:1px solid var(--rule-strong);
+    letter-spacing:0.04em;
+  }
+  tbody td{
+    padding:13px 10px;border-bottom:1px solid var(--rule);
+    font-family:'IBM Plex Mono', monospace;
+  }
+  tbody tr:hover{background:rgba(20,18,14,0.035);}
+  td.num{text-align:right;}
+  .ticker-cell{font-family:'Noto Sans KR', sans-serif;}
+  .side-badge{
+    font-family:'Noto Sans KR', sans-serif;font-size:12px;padding:3px 8px;border-radius:2px;
+  }
+  .side-badge.buy{color:var(--gain);border:1px solid var(--gain);}
+  .side-badge.sell{color:var(--loss);border:1px solid var(--loss);}
+
+  /* ---- 도장 스탬프 (실현손익 표시) ---- */
+  .stamp{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:'IBM Plex Mono', monospace;font-weight:600;font-size:13px;
+  }
+  .stamp .mark{
+    width:22px;height:22px;border-radius:50%;
+    border:1.6px solid currentColor;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-family:'Noto Serif KR', serif;font-size:12px;font-weight:900;
+    transform:rotate(-8deg);
+    opacity:0.9;
+  }
+  .stamp.gain{color:var(--gain);}
+  .stamp.loss{color:var(--loss);}
+
+  .empty-row td{color:var(--ink-muted);text-align:center;padding:36px 0;font-family:'Noto Sans KR',sans-serif;}
+
+  /* ---------- Owner form ---------- */
+  #ownerPanel{display:none;}
+  #ownerPanel.visible{display:block;}
+  .form-grid{
+    display:grid;grid-template-columns:repeat(6,1fr);gap:12px;
+    background:var(--panel-2);border:1px solid var(--rule);padding:20px;
+  }
+  .form-grid .field{display:flex;flex-direction:column;gap:6px;}
+  .form-grid label{font-size:11px;color:var(--ink-muted);font-family:'IBM Plex Mono',monospace;}
+  .form-grid input, .form-grid select, .form-grid textarea{
+    background:transparent;border:1px solid var(--rule-strong);color:var(--ink);
+    padding:9px 10px;font-size:13px;font-family:'IBM Plex Mono', monospace;border-radius:var(--radius);
+  }
+  .form-grid .span2{grid-column:span 2;}
+  .form-grid .span3{grid-column:span 3;}
+  .form-grid .span6{grid-column:span 6;}
+  @media (max-width:700px){
+    .form-grid{grid-template-columns:repeat(2,1fr);}
+    .form-grid .span2,.form-grid .span3,.form-grid .span6{grid-column:span 2;}
+  }
+  .form-actions{margin-top:14px;display:flex;gap:10px;justify-content:flex-end;}
+  .row-actions button{
+    background:none;border:none;color:var(--ink-muted);cursor:pointer;font-size:12px;
+    font-family:'IBM Plex Mono',monospace;text-decoration:underline;padding:0;margin-right:10px;
+  }
+  .row-actions button:hover{color:var(--gold);}
+
+  /* ---------- Modal (login) ---------- */
+  .modal-backdrop{
+    display:none;position:fixed;inset:0;background:rgba(6,10,16,0.72);
+    align-items:center;justify-content:center;z-index:50;
+  }
+  .modal-backdrop.visible{display:flex;}
+  .modal{
+    background:var(--panel);border:1px solid var(--rule-strong);padding:28px;width:min(340px,90vw);
+  }
+  .modal h3{margin:0 0 18px;font-family:'Noto Serif KR',serif;font-size:18px;}
+  .modal .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+  .modal label{font-size:12px;color:var(--ink-muted);}
+  .modal input{
+    background:transparent;border:1px solid var(--rule-strong);color:var(--ink);
+    padding:10px;border-radius:var(--radius);font-family:'IBM Plex Mono',monospace;
+  }
+  .modal .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:6px;}
+  .modal .error{color:var(--gain);font-size:12px;margin-top:10px;min-height:16px;}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:var(--gold);color:#1a1406;padding:10px 20px;border-radius:2px;
+    font-size:13px;font-weight:700;z-index:60;
+    opacity:0;transition:opacity .25s;pointer-events:none;
+  }
+  .toast.visible{opacity:1;}
+
+  footer{margin-top:70px;padding-top:20px;border-top:1px solid var(--rule);color:var(--ink-muted);font-size:12px;font-family:'IBM Plex Mono',monospace;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="title-block">
+      <h1>매매일지</h1>
+      <p>REALIZED P/L LEDGER — 공개 열람 가능</p>
+    </div>
+    <div id="authArea">
+      <span id="authStatus" class="mono" style="color:var(--ink-muted);"></span>
+      <button class="btn small" id="loginBtn">로그인</button>
+      <button class="btn small" id="logoutBtn" style="display:none;">로그아웃</button>
+    </div>
+  </header>
+
+  <!-- 대시보드 -->
+  <div class="section-head"><span class="eyebrow">01</span><h2>요약</h2><span class="rule"></span></div>
+  <div class="stats">
+    <div class="stat">
+      <div class="label">총 실현손익</div>
+      <div class="value mono" id="statTotalPL">0</div>
+    </div>
+    <div class="stat">
+      <div class="label">매매 횟수</div>
+      <div class="value mono" id="statCount">0</div>
+    </div>
+    <div class="stat">
+      <div class="label">승률</div>
+      <div class="value mono" id="statWinRate">0%</div>
+    </div>
+    <div class="stat">
+      <div class="label">평균 손익</div>
+      <div class="value mono" id="statAvgPL">0</div>
+    </div>
+  </div>
+
+  <!-- 차트 -->
+  <div class="section-head"><span class="eyebrow">02</span><h2>추이 &amp; 종목별 손익</h2><span class="rule"></span></div>
+  <div class="charts">
+    <div class="chart-card">
+      <h3>누적 실현손익 추이</h3>
+      <canvas id="cumulativeChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>종목별 실현손익</h3>
+      <canvas id="tickerChart"></canvas>
+    </div>
+  </div>
+
+  <!-- 기록 추가 (로그인 시에만 표시) -->
+  <div id="ownerPanel">
+    <div class="section-head"><span class="eyebrow">03</span><h2>기록 추가</h2><span class="rule"></span></div>
+    <form id="tradeForm" class="form-grid">
+      <input type="hidden" id="editId">
+      <div class="field span2">
+        <label for="fDate">날짜</label>
+        <input type="date" id="fDate" required>
+      </div>
+      <div class="field span2">
+        <label for="fTicker">종목명</label>
+        <input type="text" id="fTicker" placeholder="예: 삼성전자" required>
+      </div>
+      <div class="field span2">
+        <label for="fType">구분</label>
+        <select id="fType">
+          <option value="buy">매수</option>
+          <option value="sell">매도</option>
+        </select>
+      </div>
+      <div class="field span2">
+        <label for="fQty">수량</label>
+        <input type="number" id="fQty" min="1" step="1" required>
+      </div>
+      <div class="field span2">
+        <label for="fPrice">단가</label>
+        <input type="number" id="fPrice" min="0" step="1" required>
+      </div>
+      <div class="field span2">
+        <label for="fFee">수수료</label>
+        <input type="number" id="fFee" min="0" step="1" value="0">
+      </div>
+      <div class="field span6">
+        <label for="fMemo">메모</label>
+        <input type="text" id="fMemo" placeholder="선택사항">
+      </div>
+      <div class="form-actions span6">
+        <button type="button" class="btn" id="cancelEditBtn" style="display:none;">취소</button>
+        <button type="submit" class="btn primary" id="submitBtn">기록 저장</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- 기록 목록 -->
+  <div class="section-head"><span class="eyebrow">04</span><h2>매매 기록</h2><span class="rule"></span></div>
+  <table>
+    <thead>
+      <tr>
+        <th>날짜</th><th>종목</th><th>구분</th><th class="num">수량</th><th class="num">단가</th>
+        <th class="num">수수료</th><th class="num">실현손익</th><th></th>
+      </tr>
+    </thead>
+    <tbody id="tradeTableBody">
+      <tr class="empty-row"><td colspan="8">불러오는 중...</td></tr>
+    </tbody>
+  </table>
+
+  <footer>Firebase Firestore 기반 · 조회는 누구나 가능, 기록 작성은 계정 소유자만 가능합니다.</footer>
+</div>
+
+<!-- 로그인 모달 -->
+<div class="modal-backdrop" id="loginModal">
+  <div class="modal">
+    <h3>로그인</h3>
+    <div class="field">
+      <label for="loginEmail">이메일</label>
+      <input type="email" id="loginEmail" autocomplete="username">
+    </div>
+    <div class="field">
+      <label for="loginPw">비밀번호</label>
+      <input type="password" id="loginPw" autocomplete="current-password">
+    </div>
+    <div class="error" id="loginError"></div>
+    <div class="modal-actions">
+      <button class="btn" id="loginCancelBtn">닫기</button>
+      <button class="btn primary" id="loginSubmitBtn">로그인</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import {
+  getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+  setPersistence, browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
+  onSnapshot, query, orderBy, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+// ====== 여기에 본인의 Firebase 설정 값을 입력하세요 ======
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+// =========================================================
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+setPersistence(auth, browserLocalPersistence); // 로그인 상태를 브라우저에 유지 (재방문 시 재로그인 불필요)
+
+const AUTO_PROMPT_KEY = 'journal_login_prompted_v1';
+
+let currentUser = null;
+let trades = [];
+let cumulativeChart, tickerChart;
+
+// ---------- DOM refs ----------
+const authStatus = document.getElementById('authStatus');
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const loginModal = document.getElementById('loginModal');
+const loginCancelBtn = document.getElementById('loginCancelBtn');
+const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+const loginError = document.getElementById('loginError');
+const ownerPanel = document.getElementById('ownerPanel');
+const tradeForm = document.getElementById('tradeForm');
+const cancelEditBtn = document.getElementById('cancelEditBtn');
+const submitBtn = document.getElementById('submitBtn');
+const tableBody = document.getElementById('tradeTableBody');
+const toastEl = document.getElementById('toast');
+
+function toast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('visible');
+  setTimeout(()=>toastEl.classList.remove('visible'), 2200);
+}
+function fmt(n){
+  return Math.round(n).toLocaleString('ko-KR');
+}
+
+// ---------- Auth ----------
+function openLoginModal(){
+  loginModal.classList.add('visible');
+  loginError.textContent = '';
+  localStorage.setItem(AUTO_PROMPT_KEY, '1'); // 자동 팝업은 한 번만
+}
+function closeLoginModal(){
+  loginModal.classList.remove('visible');
+  localStorage.setItem(AUTO_PROMPT_KEY, '1');
+}
+loginBtn.addEventListener('click', openLoginModal);
+loginCancelBtn.addEventListener('click', closeLoginModal);
+loginSubmitBtn.addEventListener('click', async ()=>{
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw = document.getElementById('loginPw').value;
+  try{
+    await signInWithEmailAndPassword(auth, email, pw);
+    closeLoginModal();
+    toast('로그인되었습니다');
+  }catch(e){
+    loginError.textContent = '로그인 실패: 이메일 또는 비밀번호를 확인하세요';
+  }
+});
+logoutBtn.addEventListener('click', async ()=>{
+  await signOut(auth);
+  toast('로그아웃되었습니다');
+});
+
+let authResolvedOnce = false;
+onAuthStateChanged(auth, (user)=>{
+  currentUser = user;
+  if(user){
+    authStatus.textContent = user.email;
+    loginBtn.style.display = 'none';
+    logoutBtn.style.display = 'inline-block';
+    ownerPanel.classList.add('visible');
+  } else {
+    authStatus.textContent = '';
+    loginBtn.style.display = 'inline-block';
+    logoutBtn.style.display = 'none';
+    ownerPanel.classList.remove('visible');
+    resetForm();
+
+    // 이 브라우저에서 처음 접속했고, 로그인 기록이 없다면 자동으로 로그인 창을 띄움
+    if(!authResolvedOnce && !localStorage.getItem(AUTO_PROMPT_KEY)){
+      loginModal.classList.add('visible');
+      loginError.textContent = '';
+      localStorage.setItem(AUTO_PROMPT_KEY, '1');
+    }
+  }
+  authResolvedOnce = true;
+  renderTable(); // 소유자 여부에 따라 수정/삭제 버튼 표시가 달라짐
+});
+
+// ---------- Firestore live data ----------
+const tradesCol = collection(db, 'trades');
+const tradesQuery = query(tradesCol, orderBy('date', 'asc'));
+onSnapshot(tradesQuery, (snap)=>{
+  trades = [];
+  snap.forEach(d => trades.push({ id:d.id, ...d.data() }));
+  computeAndRender();
+}, (err)=>{
+  console.error(err);
+  tableBody.innerHTML = `<tr class="empty-row"><td colspan="8">데이터를 불러올 수 없습니다. Firebase 설정을 확인하세요.</td></tr>`;
+});
+
+// ---------- 손익 계산 (가중평균 원가법) ----------
+function computeMetrics(list){
+  const holdings = {}; // ticker -> {qty, avgCost}
+  const enriched = [];
+  let cumPL = 0;
+  const cumSeries = [];
+
+  list.forEach(t=>{
+    const qty = Number(t.quantity)||0;
+    const price = Number(t.price)||0;
+    const fee = Number(t.fee)||0;
+    const h = holdings[t.ticker] || { qty:0, avgCost:0 };
+    let realizedPL = null;
+
+    if(t.type === 'buy'){
+      const totalCost = h.qty*h.avgCost + qty*price + fee;
+      const newQty = h.qty + qty;
+      h.avgCost = newQty > 0 ? totalCost/newQty : 0;
+      h.qty = newQty;
+    } else {
+      realizedPL = (price - h.avgCost)*qty - fee;
+      h.qty = h.qty - qty;
+      cumPL += realizedPL;
+      cumSeries.push({ date:t.date, cum:cumPL });
+    }
+    holdings[t.ticker] = h;
+    enriched.push({ ...t, realizedPL });
+  });
+
+  return { enriched, cumSeries, totalPL: cumPL };
+}
+
+function computeAndRender(){
+  const { enriched, cumSeries, totalPL } = computeMetrics(trades);
+  trades = enriched;
+
+  const sells = enriched.filter(t=>t.type==='sell');
+  const wins = sells.filter(t=>t.realizedPL>0).length;
+  const winRate = sells.length ? (wins/sells.length*100) : 0;
+  const avgPL = sells.length ? totalPL/sells.length : 0;
+
+  document.getElementById('statTotalPL').textContent = fmt(totalPL);
+  document.getElementById('statTotalPL').className = 'value mono ' + (totalPL>0?'gain':totalPL<0?'loss':'');
+  document.getElementById('statCount').textContent = enriched.length;
+  document.getElementById('statWinRate').textContent = winRate.toFixed(1)+'%';
+  document.getElementById('statAvgPL').textContent = fmt(avgPL);
+  document.getElementById('statAvgPL').className = 'value mono ' + (avgPL>0?'gain':avgPL<0?'loss':'');
+
+  renderCharts(cumSeries, sells);
+  renderTable();
+}
+
+function renderCharts(cumSeries, sells){
+  const ctx1 = document.getElementById('cumulativeChart');
+  const labels1 = cumSeries.map(p=>p.date);
+  const data1 = cumSeries.map(p=>p.cum);
+  if(cumulativeChart) cumulativeChart.destroy();
+  cumulativeChart = new Chart(ctx1, {
+    type:'line',
+    data:{ labels:labels1, datasets:[{
+      data:data1, borderColor:'#c9a227', backgroundColor:'rgba(201,162,39,0.12)',
+      fill:true, tension:0.15, pointRadius:2
+    }]},
+    options:{
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#6b6f76', maxRotation:0, autoSkip:true}, grid:{color:'rgba(20,18,14,0.08)'}},
+        y:{ticks:{color:'#6b6f76'}, grid:{color:'rgba(20,18,14,0.08)'}}
+      }
+    }
+  });
+
+  const byTicker = {};
+  sells.forEach(t=>{ byTicker[t.ticker] = (byTicker[t.ticker]||0) + (t.realizedPL||0); });
+  const tickers = Object.keys(byTicker);
+  const values = tickers.map(t=>byTicker[t]);
+  const colors = values.map(v=> v>=0 ? '#e1483c' : '#3b82c4');
+
+  const ctx2 = document.getElementById('tickerChart');
+  if(tickerChart) tickerChart.destroy();
+  tickerChart = new Chart(ctx2, {
+    type:'bar',
+    data:{ labels:tickers, datasets:[{ data:values, backgroundColor:colors }] },
+    options:{
+      indexAxis:'y',
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#6b6f76'}, grid:{color:'rgba(20,18,14,0.08)'}},
+        y:{ticks:{color:'#1a1712'}, grid:{display:false}}
+      }
+    }
+  });
+}
+
+function renderTable(){
+  if(!trades.length){
+    tableBody.innerHTML = `<tr class="empty-row"><td colspan="8">아직 기록이 없습니다.</td></tr>`;
+    return;
+  }
+  const rows = [...trades].sort((a,b)=> b.date.localeCompare(a.date));
+  tableBody.innerHTML = rows.map(t=>{
+    const plCell = t.type==='sell'
+      ? `<span class="stamp ${t.realizedPL>=0?'gain':'loss'}">
+           <span class="mark">${t.realizedPL>=0?'益':'損'}</span>${fmt(t.realizedPL)}
+         </span>`
+      : `<span class="mono" style="color:var(--ink-muted);">—</span>`;
+    const actions = currentUser
+      ? `<div class="row-actions">
+           <button data-edit="${t.id}">수정</button>
+           <button data-del="${t.id}">삭제</button>
+         </div>`
+      : '';
+    return `<tr>
+      <td>${t.date}</td>
+      <td class="ticker-cell">${escapeHtml(t.ticker)}</td>
+      <td><span class="side-badge ${t.type}">${t.type==='buy'?'매수':'매도'}</span></td>
+      <td class="num">${fmt(t.quantity)}</td>
+      <td class="num">${fmt(t.price)}</td>
+      <td class="num">${fmt(t.fee||0)}</td>
+      <td class="num">${plCell}</td>
+      <td>${actions}</td>
+    </tr>`;
+  }).join('');
+
+  tableBody.querySelectorAll('[data-edit]').forEach(btn=>{
+    btn.addEventListener('click', ()=> startEdit(btn.getAttribute('data-edit')));
+  });
+  tableBody.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click', ()=> deleteTrade(btn.getAttribute('data-del')));
+  });
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ---------- Form (owner only) ----------
+function resetForm(){
+  tradeForm.reset();
+  document.getElementById('editId').value = '';
+  document.getElementById('fFee').value = 0;
+  submitBtn.textContent = '기록 저장';
+  cancelEditBtn.style.display = 'none';
+}
+cancelEditBtn.addEventListener('click', resetForm);
+
+function startEdit(id){
+  const t = trades.find(x=>x.id===id);
+  if(!t) return;
+  document.getElementById('editId').value = t.id;
+  document.getElementById('fDate').value = t.date;
+  document.getElementById('fTicker').value = t.ticker;
+  document.getElementById('fType').value = t.type;
+  document.getElementById('fQty').value = t.quantity;
+  document.getElementById('fPrice').value = t.price;
+  document.getElementById('fFee').value = t.fee||0;
+  document.getElementById('fMemo').value = t.memo||'';
+  submitBtn.textContent = '수정 저장';
+  cancelEditBtn.style.display = 'inline-block';
+  window.scrollTo({top: ownerPanel.offsetTop - 20, behavior:'smooth'});
+}
+
+async function deleteTrade(id){
+  if(!currentUser) return;
+  if(!confirm('이 기록을 삭제할까요?')) return;
+  try{
+    await deleteDoc(doc(db,'trades',id));
+    toast('삭제되었습니다');
+  }catch(e){
+    console.error(e);
+    toast('삭제 실패: 권한을 확인하세요');
+  }
+}
+
+tradeForm.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  if(!currentUser){ toast('로그인이 필요합니다'); return; }
+
+  const payload = {
+    date: document.getElementById('fDate').value,
+    ticker: document.getElementById('fTicker').value.trim(),
+    type: document.getElementById('fType').value,
+    quantity: Number(document.getElementById('fQty').value),
+    price: Number(document.getElementById('fPrice').value),
+    fee: Number(document.getElementById('fFee').value)||0,
+    memo: document.getElementById('fMemo').value.trim()
+  };
+  const editId = document.getElementById('editId').value;
+
+  try{
+    if(editId){
+      await updateDoc(doc(db,'trades',editId), payload);
+      toast('수정되었습니다');
+    } else {
+      await addDoc(tradesCol, { ...payload, createdAt: serverTimestamp() });
+      toast('기록이 저장되었습니다');
+    }
+    resetForm();
+  }catch(e){
+    console.error(e);
+    toast('저장 실패: 권한 또는 네트워크를 확인하세요');
+  }
+});
+</script>
+</body>
+</html>
