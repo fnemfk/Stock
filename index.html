@@ -127,6 +127,8 @@
   tbody tr:hover{background:rgba(20,18,14,0.035);}
   td.num{text-align:right;}
   .ticker-cell{font-family:'Nanum Gothic', sans-serif;}
+  .ticker-link{cursor:pointer;text-decoration:underline;text-decoration-color:transparent;transition:text-decoration-color .15s;}
+  .ticker-link:hover{text-decoration-color:var(--gold);color:var(--gold);}
   .side-badge{
     font-family:'Nanum Gothic', sans-serif;font-size:12px;padding:3px 8px;border-radius:2px;
   }
@@ -362,6 +364,25 @@
   </div>
 </div>
 
+<!-- 종목별 상세 팝업 -->
+<div class="modal-backdrop" id="tickerModal">
+  <div class="modal" style="width:min(640px,94vw);max-height:82vh;overflow-y:auto;">
+    <h3 id="tickerModalTitle">종목명</h3>
+    <div id="tickerModalStats" style="display:flex;gap:22px;flex-wrap:wrap;margin-bottom:18px;font-family:'Nanum Gothic', sans-serif;font-size:13px;color:var(--ink-muted);"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>날짜</th><th>구분</th><th class="num">수량</th><th class="num">단가</th><th class="num">실현손익</th>
+        </tr>
+      </thead>
+      <tbody id="tickerModalTableBody"></tbody>
+    </table>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn" id="tickerModalCloseBtn">닫기</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -504,6 +525,8 @@ const loginModal = document.getElementById('loginModal');
 const loginCancelBtn = document.getElementById('loginCancelBtn');
 const loginSubmitBtn = document.getElementById('loginSubmitBtn');
 const loginError = document.getElementById('loginError');
+const tickerModal = document.getElementById('tickerModal');
+const tickerModalCloseBtn = document.getElementById('tickerModalCloseBtn');
 const ownerPanel = document.getElementById('ownerPanel');
 const tradeForm = document.getElementById('tradeForm');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
@@ -808,7 +831,7 @@ function renderHoldings(holdings, totalPL){
         : `<span style="color:var(--ink-muted);">—</span>`;
 
       return `<tr>
-        <td class="ticker-cell">${escapeHtml(ticker)}</td>
+        <td class="ticker-cell"><span class="ticker-link" data-ticker="${escapeHtml(ticker)}">${escapeHtml(ticker)}</span></td>
         <td class="num">${fmt(qty)}</td>
         <td class="num">${fmt(h.avgPrice)}</td>
         <td class="num">${priceCell}</td>
@@ -816,6 +839,10 @@ function renderHoldings(holdings, totalPL){
         <td class="num">${plCell}</td>
       </tr>`;
     }).join('');
+
+    tbody.querySelectorAll('.ticker-link').forEach(el=>{
+      el.addEventListener('click', ()=> openTickerDetail(el.dataset.ticker));
+    });
 
     statValuation.textContent = fmt(totalValuation);
     statTotalAssets.textContent = fmt(totalPL + totalValuation);
@@ -916,6 +943,70 @@ function renderTable(){
 
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ---------- 종목별 상세 팝업 ----------
+function closeTickerModal(){
+  tickerModal.classList.remove('visible');
+}
+tickerModalCloseBtn.addEventListener('click', closeTickerModal);
+tickerModal.addEventListener('click', (e)=>{
+  if(e.target === tickerModal) closeTickerModal(); // 바깥 클릭 시 닫기
+});
+
+function openTickerDetail(ticker){
+  const rows = trades
+    .filter(t => t.ticker === ticker)
+    .sort((a,b)=>{
+      const at = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : Date.now();
+      const bt = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : Date.now();
+      return bt - at;
+    });
+
+  const sells = rows.filter(t=>t.type==='sell');
+  const realizedSum = sells.reduce((s,t)=> s + (t.realizedPL||0), 0);
+
+  // 현재 보유수량/평단가 (가중평균, 시간순으로 다시 계산)
+  const chrono = [...rows].sort((a,b)=> a.date.localeCompare(b.date));
+  let qty = 0, avgPrice = 0;
+  chrono.forEach(t=>{
+    const q = Number(t.quantity)||0;
+    const p = Number(t.price)||0;
+    if(t.type === 'buy'){
+      const newQty = qty + q;
+      avgPrice = newQty > 0 ? (qty*avgPrice + q*p) / newQty : 0;
+      qty = newQty;
+    } else {
+      qty -= q;
+    }
+  });
+
+  document.getElementById('tickerModalTitle').textContent = ticker;
+
+  const statsHtml = [
+    `<div><div style="font-size:11px;">매매 횟수</div><div class="mono" style="font-size:16px;color:var(--ink);">${rows.length}</div></div>`,
+    `<div><div style="font-size:11px;">실현손익 합계</div><div class="mono ${realizedSum>=0?'gain':'loss'}" style="font-size:16px;">${fmt(realizedSum)}</div></div>`,
+    Math.round(qty) > 0
+      ? `<div><div style="font-size:11px;">현재 보유</div><div class="mono" style="font-size:16px;color:var(--ink);">${fmt(Math.round(qty))}주 · 평단 ${fmt(avgPrice)}</div></div>`
+      : `<div><div style="font-size:11px;">현재 보유</div><div class="mono" style="font-size:16px;color:var(--ink-muted);">없음</div></div>`
+  ].join('');
+  document.getElementById('tickerModalStats').innerHTML = statsHtml;
+
+  const tbody = document.getElementById('tickerModalTableBody');
+  tbody.innerHTML = rows.map(t=>{
+    const plCell = t.type==='sell'
+      ? `<span class="stamp ${t.realizedPL>=0?'gain':'loss'}"><span class="mark">${t.realizedPL>=0?'益':'損'}</span>${fmt(t.realizedPL)}</span>`
+      : `<span class="mono" style="color:var(--ink-muted);">—</span>`;
+    return `<tr>
+      <td>${t.date}</td>
+      <td><span class="side-badge ${t.type}">${t.type==='buy'?'매수':'매도'}</span></td>
+      <td class="num">${fmt(t.quantity)}</td>
+      <td class="num">${fmt(t.price)}</td>
+      <td class="num">${plCell}</td>
+    </tr>`;
+  }).join('');
+
+  tickerModal.classList.add('visible');
 }
 
 // ---------- Form (owner only) ----------
