@@ -727,29 +727,22 @@ async function fetchCurrentPrices(codes){
   let json = null;
   let lastError = null;
 
-  // 1차: 직접 호출
+  // 네이버 API는 브라우저 CORS 정책상 직접 호출이 항상 막히므로 프록시로 바로 요청
+  // 1차: allorigins 프록시
   try{
-    json = await tryFetch(targetUrl);
+    const proxyUrl1 = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
+    json = await tryFetch(proxyUrl1);
   }catch(e1){
     lastError = e1;
-    console.warn('[시세] 직접 호출 실패, 프록시로 재시도', e1);
-    // 2차: allorigins 프록시
+    console.warn('[시세] allorigins 프록시 실패, corsproxy로 재시도', e1);
+    // 2차: corsproxy.io 프록시
     try{
-      const proxyUrl1 = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
-      json = await tryFetch(proxyUrl1);
+      const proxyUrl2 = 'https://corsproxy.io/?url=' + encodeURIComponent(targetUrl);
+      json = await tryFetch(proxyUrl2);
       lastError = null;
     }catch(e2){
       lastError = e2;
-      console.warn('[시세] allorigins 프록시도 실패, corsproxy로 재시도', e2);
-      // 3차: corsproxy.io 프록시
-      try{
-        const proxyUrl2 = 'https://corsproxy.io/?url=' + encodeURIComponent(targetUrl);
-        json = await tryFetch(proxyUrl2);
-        lastError = null;
-      }catch(e3){
-        lastError = e3;
-        console.error('[시세] 모든 시도 실패', e3);
-      }
+      console.error('[시세] 모든 시도 실패', e2);
     }
   }
 
