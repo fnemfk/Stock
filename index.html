@@ -6,13 +6,13 @@
 <title>솔주머니</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%92%B8</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
   :root{
-    --bg:#fff6e3;
+    --bg:#ffffff;
     --panel:#ffffff;
-    --panel-2:#fff1d6;
+    --panel-2:#f7f6f2;
     --rule: rgba(139,110,60,0.16);
     --rule-strong: rgba(139,110,60,0.32);
     --ink:#5b4632;
@@ -27,16 +27,14 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background:
-      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(126,198,235,0.18), transparent),
-      var(--bg);
+    background:var(--bg);
     color:var(--ink);
-    font-family:'Jua', system-ui, sans-serif;
+    font-family:'Do Hyeon', system-ui, sans-serif;
     min-height:100vh;
     letter-spacing:0.01em;
   }
-  .mono{font-family:'Jua', sans-serif;}
-  .serif{font-family:'Jua', sans-serif;}
+  .mono{font-family:'Do Hyeon', sans-serif;}
+  .serif{font-family:'Do Hyeon', sans-serif;}
 
   .wrap{max-width:1040px;margin:0 auto;padding:0 20px 80px;}
 
@@ -48,7 +46,7 @@
     flex-wrap:wrap;
   }
   header .title-block h1{
-    font-family:'Jua', sans-serif;
+    font-family:'Do Hyeon', sans-serif;
     font-weight:400;
     font-size:clamp(28px,4vw,40px);
     margin:0 0 6px;
@@ -56,7 +54,7 @@
   }
   header .title-block p{
     margin:0;color:var(--ink-muted);font-size:13px;
-    font-family:'Jua', sans-serif;
+    font-family:'Do Hyeon', sans-serif;
   }
   #authArea{display:flex;align-items:center;gap:10px;font-size:13px;}
   .btn{
@@ -65,7 +63,7 @@
     color:var(--ink);
     padding:9px 18px;
     font-size:13px;
-    font-family:'Jua', sans-serif;
+    font-family:'Do Hyeon', sans-serif;
     border-radius:999px;
     cursor:pointer;
     box-shadow:0 3px 0 var(--rule-strong);
@@ -82,7 +80,7 @@
   .page-btn{
     min-width:32px;height:32px;padding:0 8px;
     border:2px solid var(--rule-strong);background:var(--panel);color:var(--ink-muted);
-    border-radius:999px;cursor:pointer;font-family:'Jua', sans-serif;font-size:13px;
+    border-radius:999px;cursor:pointer;font-family:'Do Hyeon', sans-serif;font-size:13px;
     box-shadow:0 2px 0 var(--rule-strong);
   }
   .page-btn:hover{border-color:var(--gold);color:#b8860b;}
@@ -97,7 +95,7 @@
   .tab-nav{display:flex;gap:10px;margin:28px 0 8px;flex-wrap:wrap;}
   .tab-btn{
     padding:10px 24px;border-radius:999px;border:2px solid var(--rule-strong);
-    background:var(--panel);color:var(--ink-muted);font-family:'Jua', sans-serif;font-size:15px;
+    background:var(--panel);color:var(--ink-muted);font-family:'Do Hyeon', sans-serif;font-size:15px;
     cursor:pointer;box-shadow:0 3px 0 var(--rule-strong);transition:transform .1s;
   }
   .tab-btn:hover:not(.active){border-color:var(--leaf);color:var(--leaf);}
@@ -110,11 +108,11 @@
     display:flex;align-items:center;gap:12px;margin:44px 0 20px;
   }
   .section-head .eyebrow{
-    font-family:'Jua', sans-serif;color:#fff;background:var(--leaf);
+    font-family:'Do Hyeon', sans-serif;color:#fff;background:var(--leaf);
     font-size:11px;letter-spacing:0.05em;padding:3px 11px;border-radius:999px;
   }
   .section-head h2{
-    font-family:'Jua', sans-serif;font-size:20px;margin:0;font-weight:400;
+    font-family:'Do Hyeon', sans-serif;font-size:20px;margin:0;font-weight:400;
   }
   .section-head .rule{flex:1;height:3px;background-image:radial-gradient(circle, var(--rule-strong) 1.5px, transparent 1.5px);background-size:8px 3px;background-repeat:repeat-x;}
 
@@ -129,8 +127,8 @@
     box-shadow:0 4px 0 var(--rule);
     padding:20px 18px;
   }
-  .stat .label{font-size:12px;color:var(--ink-muted);margin-bottom:10px;font-family:'Jua', sans-serif;}
-  .stat .value{font-family:'Jua', sans-serif;font-size:24px;font-weight:400;}
+  .stat .label{font-size:12px;color:var(--ink-muted);margin-bottom:10px;font-family:'Do Hyeon', sans-serif;}
+  .stat .value{font-family:'Do Hyeon', sans-serif;font-size:24px;font-weight:400;}
   .stat .value.gain{color:var(--gain);}
   .stat .value.loss{color:var(--loss);}
   @media (max-width:700px){ .stats{grid-template-columns:repeat(2,1fr);} }
@@ -138,7 +136,7 @@
   /* ---------- Charts ---------- */
   .charts{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;}
   .chart-card{background:var(--panel);border:2px solid var(--rule);border-radius:var(--radius);box-shadow:0 4px 0 var(--rule);padding:20px;}
-  .chart-card h3{margin:0 0 14px;font-size:13px;font-weight:400;color:var(--ink-muted);font-family:'Jua', sans-serif;}
+  .chart-card h3{margin:0 0 14px;font-size:13px;font-weight:400;color:var(--ink-muted);font-family:'Do Hyeon', sans-serif;}
   .chart-card canvas{max-height:260px;}
   @media (max-width:760px){ .charts{grid-template-columns:1fr;} }
 
@@ -150,23 +148,23 @@
   }
   thead th{
     text-align:left;font-weight:400;color:var(--ink-muted);
-    font-size:12px;font-family:'Jua', sans-serif;
+    font-size:12px;font-family:'Do Hyeon', sans-serif;
     padding:12px 10px;border-bottom:2px solid var(--rule-strong);
     background:var(--panel-2);
     letter-spacing:0.02em;
   }
   tbody td{
     padding:13px 10px;border-bottom:1px solid var(--rule);
-    font-family:'Jua', sans-serif;
+    font-family:'Do Hyeon', sans-serif;
   }
   tbody tr:last-child td{border-bottom:none;}
   tbody tr:hover{background:rgba(124,179,66,0.08);}
   td.num{text-align:right;}
-  .ticker-cell{font-family:'Jua', sans-serif;}
+  .ticker-cell{font-family:'Do Hyeon', sans-serif;}
   .ticker-link{cursor:pointer;text-decoration:underline;text-decoration-color:transparent;transition:text-decoration-color .15s;}
   .ticker-link:hover{text-decoration-color:var(--gold);color:#b8860b;}
   .side-badge{
-    font-family:'Jua', sans-serif;font-size:12px;padding:4px 11px;border-radius:999px;
+    font-family:'Do Hyeon', sans-serif;font-size:12px;padding:4px 11px;border-radius:999px;
   }
   .side-badge.buy{color:#fff;background:var(--gain);}
   .side-badge.sell{color:#fff;background:var(--loss);}
@@ -174,20 +172,20 @@
   /* ---- 도장 스탬프 (실현손익 표시) ---- */
   .stamp{
     display:inline-flex;align-items:center;gap:6px;
-    font-family:'Jua', sans-serif;font-weight:400;font-size:13px;
+    font-family:'Do Hyeon', sans-serif;font-weight:400;font-size:13px;
   }
   .stamp .mark{
     width:22px;height:22px;border-radius:50%;
     border:1.6px solid currentColor;
     background:color-mix(in srgb, currentColor 16%, white);
     display:inline-flex;align-items:center;justify-content:center;
-    font-family:'Jua', sans-serif;font-size:12px;font-weight:400;
+    font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;font-size:12px;font-weight:700;
     opacity:0.95;
   }
   .stamp.gain{color:var(--gain);}
   .stamp.loss{color:var(--loss);}
 
-  .empty-row td{color:var(--ink-muted);text-align:center;padding:36px 0;font-family:'Jua', sans-serif;}
+  .empty-row td{color:var(--ink-muted);text-align:center;padding:36px 0;font-family:'Do Hyeon', sans-serif;}
 
   /* ---------- Owner form ---------- */
   .form-grid{
@@ -195,7 +193,7 @@
     background:var(--panel-2);border:2px dashed var(--rule-strong);border-radius:var(--radius);padding:20px;
   }
   .form-grid .field{display:flex;flex-direction:column;gap:6px;}
-  .form-grid label{font-size:11px;color:var(--ink-muted);font-family:'Jua', sans-serif;}
+  .form-grid label{font-size:11px;color:var(--ink-muted);font-family:'Do Hyeon', sans-serif;}
   .suggest-list{
     display:none;position:absolute;top:100%;left:0;right:0;z-index:30;
     background:var(--panel);border:2px solid var(--rule-strong);border-radius:12px;
@@ -207,7 +205,7 @@
   .suggest-list li:hover{background:rgba(255,201,77,0.25);color:#b8860b;}
   .form-grid input, .form-grid select, .form-grid textarea{
     background:#fff;border:2px solid var(--rule-strong);color:var(--ink);
-    padding:9px 10px;font-size:13px;font-family:'Jua', sans-serif;border-radius:12px;
+    padding:9px 10px;font-size:13px;font-family:'Do Hyeon', sans-serif;border-radius:12px;
   }
   .form-grid .span2{grid-column:span 2;}
   .form-grid .span3{grid-column:span 3;}
@@ -219,7 +217,7 @@
   .form-actions{margin-top:14px;display:flex;gap:10px;justify-content:flex-end;}
   .row-actions button{
     background:none;border:none;color:var(--ink-muted);cursor:pointer;font-size:12px;
-    font-family:'Jua', sans-serif;text-decoration:underline;padding:0;margin-right:10px;
+    font-family:'Do Hyeon', sans-serif;text-decoration:underline;padding:0;margin-right:10px;
   }
   .row-actions button:hover{color:var(--leaf);}
 
@@ -233,12 +231,12 @@
     background:var(--panel);border:2px solid var(--rule-strong);border-radius:24px;padding:28px;width:min(340px,90vw);
     box-shadow:0 14px 32px rgba(91,70,50,0.28);
   }
-  .modal h3{margin:0 0 18px;font-family:'Jua', sans-serif;font-size:18px;font-weight:400;}
+  .modal h3{margin:0 0 18px;font-family:'Do Hyeon', sans-serif;font-size:18px;font-weight:400;}
   .modal .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
   .modal label{font-size:12px;color:var(--ink-muted);}
   .modal input{
     background:#fff;border:2px solid var(--rule-strong);color:var(--ink);
-    padding:10px;border-radius:12px;font-family:'Jua', sans-serif;
+    padding:10px;border-radius:12px;font-family:'Do Hyeon', sans-serif;
   }
   .modal .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:6px;}
   .modal .error{color:var(--gain);font-size:12px;margin-top:10px;min-height:16px;}
@@ -252,7 +250,7 @@
   }
   .toast.visible{opacity:1;}
 
-  footer{margin-top:70px;padding-top:20px;border-top:3px dashed var(--rule);color:var(--ink-muted);font-size:12px;font-family:'Jua', sans-serif;}
+  footer{margin-top:70px;padding-top:20px;border-top:3px dashed var(--rule);color:var(--ink-muted);font-size:12px;font-family:'Do Hyeon', sans-serif;}
 </style>
 </head>
 <body>
@@ -318,7 +316,7 @@
     <div class="section-head" style="align-items:center;flex-wrap:wrap;row-gap:10px;">
       <span class="eyebrow">03</span><h2>매매 기록</h2><span class="rule"></span>
       <label for="dateSearchInput" style="font-size:12px;color:var(--ink-muted);white-space:nowrap;">날짜 검색</label>
-      <input type="date" id="dateSearchInput" style="background:#fff;border:2px solid var(--rule-strong);color:var(--ink);padding:7px 10px;font-size:13px;border-radius:12px;font-family:'Jua', sans-serif;">
+      <input type="date" id="dateSearchInput" style="background:#fff;border:2px solid var(--rule-strong);color:var(--ink);padding:7px 10px;font-size:13px;border-radius:12px;font-family:'Do Hyeon', sans-serif;">
       <button type="button" class="btn small" id="dateSearchClearBtn">전체보기</button>
     </div>
     <table>
@@ -332,7 +330,7 @@
         <tr class="empty-row"><td colspan="7">불러오는 중...</td></tr>
       </tbody>
     </table>
-    <div id="pagination" style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:18px;font-family:'Jua', sans-serif;font-size:13px;"></div>
+    <div id="pagination" style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:18px;font-family:'Do Hyeon', sans-serif;font-size:13px;"></div>
   </div>
 
   <!-- ===== 탭 2: 손익분석 ===== -->
@@ -395,7 +393,7 @@
 <div class="modal-backdrop" id="tickerModal">
   <div class="modal" style="width:min(640px,94vw);max-height:82vh;overflow-y:auto;">
     <h3 id="tickerModalTitle">종목명</h3>
-    <div id="tickerModalStats" style="display:flex;gap:22px;flex-wrap:wrap;margin-bottom:18px;font-family:'Jua', sans-serif;font-size:13px;color:var(--ink-muted);"></div>
+    <div id="tickerModalStats" style="display:flex;gap:22px;flex-wrap:wrap;margin-bottom:18px;font-family:'Do Hyeon', sans-serif;font-size:13px;color:var(--ink-muted);"></div>
     <table>
       <thead>
         <tr>
@@ -905,7 +903,7 @@ function renderPeriodTable(sells){
 
   tbody.innerHTML = rows.map(([key, v])=>{
     const cls = v.pl >= 0 ? 'gain' : 'loss';
-    const mark = v.pl >= 0 ? '益' : '損';
+    const mark = v.pl >= 0 ? '익' : '손';
     const keyCell = periodMode === 'ticker' ? escapeHtml(key) : key;
     return `<tr>
       <td><span class="ticker-link" data-key="${escapeHtml(key)}">${keyCell}</span></td>
@@ -969,7 +967,7 @@ function openPeriodDetail(key){
   } else {
     tbody.innerHTML = rows.map(([label, v])=>{
       const cls = v.pl >= 0 ? 'gain' : 'loss';
-      const mark = v.pl >= 0 ? '益' : '損';
+      const mark = v.pl >= 0 ? '익' : '손';
       return `<tr>
         <td>${escapeHtml(label)}</td>
         <td class="num"><span class="stamp ${cls}"><span class="mark">${mark}</span>${fmt(v.pl)}${fmtPct(v.pl, v.cost)}</span></td>
@@ -1089,7 +1087,7 @@ function renderHoldings(holdings, totalPL){
         priceCell = `<span style="color:var(--ink-muted);">응답없음</span>`;
       }
       const plCell = valuationPL !== null
-        ? `<span class="stamp ${valuationPL>=0?'gain':'loss'}"><span class="mark">${valuationPL>=0?'益':'損'}</span>${fmt(valuationPL)}</span>`
+        ? `<span class="stamp ${valuationPL>=0?'gain':'loss'}"><span class="mark">${valuationPL>=0?'익':'손'}</span>${fmt(valuationPL)}</span>`
         : `<span style="color:var(--ink-muted);">—</span>`;
 
       return `<tr>
@@ -1213,7 +1211,7 @@ function renderTable(){
   tableBody.innerHTML = pageRows.map(t=>{
     const plCell = t.type==='sell'
       ? `<span class="stamp ${t.realizedPL>=0?'gain':'loss'}">
-           <span class="mark">${t.realizedPL>=0?'益':'損'}</span>${fmt(t.realizedPL)}
+           <span class="mark">${t.realizedPL>=0?'익':'손'}</span>${fmt(t.realizedPL)}
          </span>`
       : `<span class="mono" style="color:var(--ink-muted);">—</span>`;
     const actions = currentUser
@@ -1333,7 +1331,7 @@ function openTickerDetail(ticker){
   const tbody = document.getElementById('tickerModalTableBody');
   tbody.innerHTML = rows.map(t=>{
     const plCell = t.type==='sell'
-      ? `<span class="stamp ${t.realizedPL>=0?'gain':'loss'}"><span class="mark">${t.realizedPL>=0?'益':'損'}</span>${fmt(t.realizedPL)}</span>`
+      ? `<span class="stamp ${t.realizedPL>=0?'gain':'loss'}"><span class="mark">${t.realizedPL>=0?'익':'손'}</span>${fmt(t.realizedPL)}</span>`
       : `<span class="mono" style="color:var(--ink-muted);">—</span>`;
     return `<tr>
       <td>${t.date}</td>
