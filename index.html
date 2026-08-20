@@ -270,22 +270,6 @@
   <div id="ownerPanel">
     <div class="section-head"><span class="eyebrow">04</span><h2>기록 추가</h2><span class="rule"></span></div>
 
-    <div id="feeRateSettings" style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;font-size:12px;color:var(--ink-muted);">
-      <div class="field" style="max-width:140px;">
-        <label for="feeRateBuy">매수 수수료율(%)</label>
-        <input type="number" id="feeRateBuy" min="0" step="0.0000001" value="0.0043319">
-      </div>
-      <div class="field" style="max-width:140px;">
-        <label for="feeRateSell">매도 수수료율(%)</label>
-        <input type="number" id="feeRateSell" min="0" step="0.0000001" value="0.0043319">
-      </div>
-      <div class="field" style="max-width:140px;">
-        <label for="taxRateSell">매도 세금(%)</label>
-        <input type="number" id="taxRateSell" min="0" step="0.001" value="0.15">
-      </div>
-      <div style="align-self:center;">나무증권 우대수수료 기준(코스피·코스닥·코넥스 0.0043319%, 매도세 0.15%)으로 기본 설정했어요. ETF/ETN/ELW는 0.0049010%로 직접 조정하세요.</div>
-    </div>
-
     <form id="tradeForm" class="form-grid">
       <input type="hidden" id="editId">
       <div class="field span2">
@@ -312,10 +296,7 @@
         <label for="fPrice">단가</label>
         <input type="number" id="fPrice" min="0" step="1" required>
       </div>
-      <div class="field span2">
-        <label for="fFee">수수료 (자동계산)</label>
-        <input type="number" id="fFee" min="0" step="1" value="0">
-      </div>
+      <input type="hidden" id="fFee" value="0">
       <div class="field span6">
         <label for="fMemo">메모</label>
         <input type="text" id="fMemo" placeholder="선택사항">
@@ -333,11 +314,11 @@
     <thead>
       <tr>
         <th>날짜</th><th>종목</th><th>구분</th><th class="num">수량</th><th class="num">단가</th>
-        <th class="num">수수료</th><th class="num">실현손익</th><th></th>
+        <th class="num">실현손익</th><th></th>
       </tr>
     </thead>
     <tbody id="tradeTableBody">
-      <tr class="empty-row"><td colspan="8">불러오는 중...</td></tr>
+      <tr class="empty-row"><td colspan="7">불러오는 중...</td></tr>
     </tbody>
   </table>
 
@@ -539,7 +520,7 @@ onSnapshot(tradesQuery, (snap)=>{
   computeAndRender();
 }, (err)=>{
   console.error(err);
-  tableBody.innerHTML = `<tr class="empty-row"><td colspan="8">데이터를 불러올 수 없습니다. Firebase 설정을 확인하세요.</td></tr>`;
+  tableBody.innerHTML = `<tr class="empty-row"><td colspan="7">데이터를 불러올 수 없습니다. Firebase 설정을 확인하세요.</td></tr>`;
 });
 
 // ---------- 손익 계산 (가중평균 원가법) ----------
@@ -663,7 +644,7 @@ function renderCharts(cumSeries, sells){
 
 function renderTable(){
   if(!trades.length){
-    tableBody.innerHTML = `<tr class="empty-row"><td colspan="8">아직 기록이 없습니다.</td></tr>`;
+    tableBody.innerHTML = `<tr class="empty-row"><td colspan="7">아직 기록이 없습니다.</td></tr>`;
     return;
   }
   const rows = [...trades].sort((a,b)=> b.date.localeCompare(a.date));
@@ -685,7 +666,6 @@ function renderTable(){
       <td><span class="side-badge ${t.type}">${t.type==='buy'?'매수':'매도'}</span></td>
       <td class="num">${fmt(t.quantity)}</td>
       <td class="num">${fmt(t.price)}</td>
-      <td class="num">${fmt(t.fee||0)}</td>
       <td class="num">${plCell}</td>
       <td>${actions}</td>
     </tr>`;
@@ -705,23 +685,15 @@ function escapeHtml(s){
 
 // ---------- Form (owner only) ----------
 
-// 수수료율 설정 저장/불러오기 (브라우저에 저장, 본인 증권사 요율에 맞게 조정 가능)
-const feeRateBuyInput = document.getElementById('feeRateBuy');
-const feeRateSellInput = document.getElementById('feeRateSell');
-const taxRateSellInput = document.getElementById('taxRateSell');
+// 수수료율 (나무증권 우대수수료 기준, 화면에는 노출하지 않고 내부적으로만 사용)
+const FEE_RATE_BUY = 0.0043319;   // 매수 수수료율(%)
+const FEE_RATE_SELL = 0.0043319;  // 매도 수수료율(%)
+const TAX_RATE_SELL = 0.15;       // 매도 세금(%)
+
 const fQtyInput = document.getElementById('fQty');
 const fPriceInput = document.getElementById('fPrice');
 const fTypeInput = document.getElementById('fType');
 const fFeeInput = document.getElementById('fFee');
-
-['feeRateBuy','feeRateSell','taxRateSell'].forEach(key=>{
-  const saved = localStorage.getItem(key);
-  if(saved !== null) document.getElementById(key).value = saved;
-  document.getElementById(key).addEventListener('change', ()=>{
-    localStorage.setItem(key, document.getElementById(key).value);
-    autoCalcFee();
-  });
-});
 
 function autoCalcFee(){
   const qty = Number(fQtyInput.value) || 0;
@@ -729,11 +701,10 @@ function autoCalcFee(){
   if(qty <= 0 || price <= 0) return;
   const amount = qty * price;
   const type = fTypeInput.value;
-  const commissionRate = Number(type==='buy' ? feeRateBuyInput.value : feeRateSellInput.value) || 0;
+  const commissionRate = type === 'buy' ? FEE_RATE_BUY : FEE_RATE_SELL;
   let fee = amount * commissionRate / 100;
   if(type === 'sell'){
-    const taxRate = Number(taxRateSellInput.value) || 0;
-    fee += amount * taxRate / 100;
+    fee += amount * TAX_RATE_SELL / 100;
   }
   fFeeInput.value = Math.round(fee);
 }
