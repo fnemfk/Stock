@@ -24,9 +24,8 @@
     --loss:#4fc3f7;       /* 하락/손실 = 하늘색 */
     --radius:16px;
   }
-  *{box-sizing:border-box;}
+  *{box-sizing:border-box;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
   html,body{margin:0;padding:0;}
-  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;} /* 모바일 브라우저의 자동 글자 확대 방지 (카드마다 크기 달라지는 문제 해결) */
   body{
     background:var(--bg);
     color:var(--ink);
@@ -161,7 +160,7 @@
     padding:20px 18px;
   }
   .stat .label{font-size:12px;color:var(--ink-muted);margin-bottom:10px;font-family:'Gowun Dodum', sans-serif;}
-  .stat .value{font-family:'Gowun Dodum', sans-serif;font-size:24px;font-weight:400;}
+  .stat .value{font-family:'Gowun Dodum', sans-serif;font-size:14px;font-weight:400;}
   .stat .value.gain{color:var(--gain);}
   .stat .value.loss{color:var(--loss);}
   @media (max-width:700px){ .stats{grid-template-columns:repeat(2,1fr);} }
