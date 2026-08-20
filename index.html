@@ -26,6 +26,7 @@
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;} /* 모바일 브라우저의 자동 글자 확대 방지 (카드마다 크기 달라지는 문제 해결) */
   body{
     background:var(--bg);
     color:var(--ink);
@@ -144,8 +145,8 @@
   }
   @media (max-width:600px){
     .record-list-head .rule{display:none;} /* 좁은 화면에서는 점선 대신 줄바꿈으로 정리 */
-    .date-search-group{width:100%;}
-    .date-search-group input[type="date"]{flex:1;width:auto;min-width:0;}
+    .date-search-group{width:auto;flex-wrap:wrap;}
+    .date-search-group input[type="date"]{width:118px;flex:none;padding:6px 8px;}
   }
 
   /* ---------- Stat cards ---------- */
