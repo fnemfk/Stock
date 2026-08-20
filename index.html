@@ -3,186 +3,211 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>기록장</title>
+<title>솔주머니</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%92%B8</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
   :root{
-    --bg:#fdfcfa;
+    --bg:#fff6e3;
     --panel:#ffffff;
-    --panel-2:#f6f4ef;
-    --rule: rgba(20,18,14,0.10);
-    --rule-strong: rgba(20,18,14,0.28);
-    --ink:#1a1712;
-    --ink-muted:#6b6f76;
-    --gold:#a5780f;
-    --gain:#c1392b;   /* 상승/이익 = 빨강 (국내 관행) */
-    --loss:#25628f;   /* 하락/손실 = 파랑 */
-    --radius:2px;
+    --panel-2:#fff1d6;
+    --rule: rgba(139,110,60,0.16);
+    --rule-strong: rgba(139,110,60,0.32);
+    --ink:#5b4632;
+    --ink-muted:#a9906f;
+    --gold:#ffc94d;      /* nook 코인 옐로 - 포인트/스탬프/토스트 */
+    --leaf:#7cb342;       /* 리프 그린 - 버튼/탭 액티브 */
+    --leaf-dark:#5a9130;  /* 버튼 그림자용 */
+    --gain:#ff6f61;       /* 상승/이익 = 코랄 (국내 관행상 붉은 계열) */
+    --loss:#4fc3f7;       /* 하락/손실 = 하늘색 */
+    --radius:16px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
     background:
-      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(165,120,15,0.05), transparent),
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(126,198,235,0.18), transparent),
       var(--bg);
     color:var(--ink);
-    font-family:'Nanum Gothic', system-ui, sans-serif;
+    font-family:'Jua', system-ui, sans-serif;
     min-height:100vh;
     letter-spacing:0.01em;
   }
-  .mono{font-family:'Nanum Gothic', sans-serif;}
-  .serif{font-family:'Nanum Gothic', sans-serif;}
+  .mono{font-family:'Jua', sans-serif;}
+  .serif{font-family:'Jua', sans-serif;}
 
   .wrap{max-width:1040px;margin:0 auto;padding:0 20px 80px;}
 
   /* ---------- Header ---------- */
   header{
     padding:20px 0 16px;
-    border-bottom:1px solid var(--rule-strong);
+    border-bottom:3px dashed var(--rule-strong);
     display:flex;justify-content:flex-end;align-items:center;gap:16px;
     flex-wrap:wrap;
   }
   header .title-block h1{
-    font-family:'Nanum Gothic', sans-serif;
-    font-weight:900;
+    font-family:'Jua', sans-serif;
+    font-weight:400;
     font-size:clamp(28px,4vw,40px);
     margin:0 0 6px;
     letter-spacing:0.02em;
   }
   header .title-block p{
     margin:0;color:var(--ink-muted);font-size:13px;
-    font-family:'Nanum Gothic', sans-serif;
+    font-family:'Jua', sans-serif;
   }
   #authArea{display:flex;align-items:center;gap:10px;font-size:13px;}
   .btn{
-    background:transparent;
-    border:1px solid var(--rule-strong);
+    background:var(--panel);
+    border:2px solid var(--rule-strong);
     color:var(--ink);
-    padding:9px 16px;
+    padding:9px 18px;
     font-size:13px;
-    font-family:'Nanum Gothic', sans-serif;
-    border-radius:var(--radius);
+    font-family:'Jua', sans-serif;
+    border-radius:999px;
     cursor:pointer;
-    transition:border-color .15s, color .15s;
+    box-shadow:0 3px 0 var(--rule-strong);
+    transition:border-color .15s, color .15s, transform .1s, box-shadow .1s;
   }
-  .btn:hover{border-color:var(--gold);color:var(--gold);}
+  .btn:hover{border-color:var(--leaf);color:var(--leaf);transform:translateY(-1px);}
+  .btn:active{transform:translateY(2px);box-shadow:0 0 0 var(--rule-strong);}
   .btn.primary{
-    background:var(--gold);border-color:var(--gold);color:#1a1406;font-weight:700;
+    background:var(--leaf);border-color:var(--leaf);color:#fff;font-weight:700;
+    box-shadow:0 3px 0 var(--leaf-dark);
   }
-  .btn.primary:hover{filter:brightness(1.08);color:#1a1406;}
-  .btn.small{padding:6px 12px;font-size:12px;}
+  .btn.primary:hover{filter:brightness(1.05);color:#fff;transform:translateY(-1px);}
+  .btn.small{padding:6px 14px;font-size:12px;}
   .page-btn{
-    min-width:30px;height:30px;padding:0 8px;
-    border:1px solid var(--rule-strong);background:transparent;color:var(--ink-muted);
-    border-radius:var(--radius);cursor:pointer;font-family:'Nanum Gothic', sans-serif;font-size:13px;
+    min-width:32px;height:32px;padding:0 8px;
+    border:2px solid var(--rule-strong);background:var(--panel);color:var(--ink-muted);
+    border-radius:999px;cursor:pointer;font-family:'Jua', sans-serif;font-size:13px;
+    box-shadow:0 2px 0 var(--rule-strong);
   }
-  .page-btn:hover{border-color:var(--gold);color:var(--gold);}
-  .page-btn.active{background:var(--gold);border-color:var(--gold);color:#1a1406;font-weight:700;}
+  .page-btn:hover{border-color:var(--gold);color:#b8860b;}
+  .page-btn.active{background:var(--gold);border-color:var(--gold);color:#5b4632;font-weight:700;}
   .page-btn:disabled{opacity:0.35;cursor:default;}
   .page-btn:disabled:hover{border-color:var(--rule-strong);color:var(--ink-muted);}
   .btn:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{
-    outline:2px solid var(--gold); outline-offset:2px;
+    outline:3px solid var(--gold); outline-offset:2px;
   }
+
+  /* ---------- Tabs ---------- */
+  .tab-nav{display:flex;gap:10px;margin:28px 0 8px;flex-wrap:wrap;}
+  .tab-btn{
+    padding:10px 24px;border-radius:999px;border:2px solid var(--rule-strong);
+    background:var(--panel);color:var(--ink-muted);font-family:'Jua', sans-serif;font-size:15px;
+    cursor:pointer;box-shadow:0 3px 0 var(--rule-strong);transition:transform .1s;
+  }
+  .tab-btn:hover:not(.active){border-color:var(--leaf);color:var(--leaf);}
+  .tab-btn.active{background:var(--leaf);border-color:var(--leaf);color:#fff;box-shadow:0 3px 0 var(--leaf-dark);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
 
   /* ---------- Section headings ---------- */
   .section-head{
-    display:flex;align-items:baseline;gap:12px;margin:56px 0 20px;
+    display:flex;align-items:center;gap:12px;margin:44px 0 20px;
   }
   .section-head .eyebrow{
-    font-family:'Nanum Gothic', sans-serif;color:var(--gold);font-size:12px;letter-spacing:0.12em;
+    font-family:'Jua', sans-serif;color:#fff;background:var(--leaf);
+    font-size:11px;letter-spacing:0.05em;padding:3px 11px;border-radius:999px;
   }
   .section-head h2{
-    font-family:'Nanum Gothic', sans-serif;font-size:20px;margin:0;font-weight:700;
+    font-family:'Jua', sans-serif;font-size:20px;margin:0;font-weight:400;
   }
-  .section-head .rule{flex:1;height:1px;background:var(--rule);}
+  .section-head .rule{flex:1;height:3px;background-image:radial-gradient(circle, var(--rule-strong) 1.5px, transparent 1.5px);background-size:8px 3px;background-repeat:repeat-x;}
 
   /* ---------- Stat cards ---------- */
   .stats{
-    display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
-    background:var(--rule);
-    border:1px solid var(--rule);
+    display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
   }
   .stat{
     background:var(--panel);
-    padding:22px 18px;
+    border:2px solid var(--rule);
+    border-radius:var(--radius);
+    box-shadow:0 4px 0 var(--rule);
+    padding:20px 18px;
   }
-  .stat .label{font-size:12px;color:var(--ink-muted);margin-bottom:10px;font-family:'Nanum Gothic', sans-serif;}
-  .stat .value{font-family:'Nanum Gothic', sans-serif;font-size:24px;font-weight:600;}
+  .stat .label{font-size:12px;color:var(--ink-muted);margin-bottom:10px;font-family:'Jua', sans-serif;}
+  .stat .value{font-family:'Jua', sans-serif;font-size:24px;font-weight:400;}
   .stat .value.gain{color:var(--gain);}
   .stat .value.loss{color:var(--loss);}
   @media (max-width:700px){ .stats{grid-template-columns:repeat(2,1fr);} }
 
   /* ---------- Charts ---------- */
-  .charts{display:grid;grid-template-columns:1.3fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule);}
-  .chart-card{background:var(--panel);padding:20px;}
-  .chart-card h3{margin:0 0 14px;font-size:13px;font-weight:500;color:var(--ink-muted);font-family:'Nanum Gothic', sans-serif;}
+  .charts{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;}
+  .chart-card{background:var(--panel);border:2px solid var(--rule);border-radius:var(--radius);box-shadow:0 4px 0 var(--rule);padding:20px;}
+  .chart-card h3{margin:0 0 14px;font-size:13px;font-weight:400;color:var(--ink-muted);font-family:'Jua', sans-serif;}
   .chart-card canvas{max-height:260px;}
   @media (max-width:760px){ .charts{grid-template-columns:1fr;} }
 
-  /* ---------- Ledger table ---------- */
-  table{width:100%;border-collapse:collapse;font-size:14px;}
+  /* ---------- Table ---------- */
+  table{
+    width:100%;border-collapse:separate;border-spacing:0;font-size:14px;
+    border:2px solid var(--rule);border-radius:var(--radius);overflow:hidden;
+    box-shadow:0 4px 0 var(--rule);
+  }
   thead th{
-    text-align:left;font-weight:500;color:var(--ink-muted);
-    font-size:12px;font-family:'Nanum Gothic', sans-serif;
-    padding:10px 10px;border-bottom:1px solid var(--rule-strong);
-    letter-spacing:0.04em;
+    text-align:left;font-weight:400;color:var(--ink-muted);
+    font-size:12px;font-family:'Jua', sans-serif;
+    padding:12px 10px;border-bottom:2px solid var(--rule-strong);
+    background:var(--panel-2);
+    letter-spacing:0.02em;
   }
   tbody td{
     padding:13px 10px;border-bottom:1px solid var(--rule);
-    font-family:'Nanum Gothic', sans-serif;
+    font-family:'Jua', sans-serif;
   }
-  tbody tr:hover{background:rgba(20,18,14,0.035);}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(124,179,66,0.08);}
   td.num{text-align:right;}
-  .ticker-cell{font-family:'Nanum Gothic', sans-serif;}
+  .ticker-cell{font-family:'Jua', sans-serif;}
   .ticker-link{cursor:pointer;text-decoration:underline;text-decoration-color:transparent;transition:text-decoration-color .15s;}
-  .ticker-link:hover{text-decoration-color:var(--gold);color:var(--gold);}
+  .ticker-link:hover{text-decoration-color:var(--gold);color:#b8860b;}
   .side-badge{
-    font-family:'Nanum Gothic', sans-serif;font-size:12px;padding:3px 8px;border-radius:2px;
+    font-family:'Jua', sans-serif;font-size:12px;padding:4px 11px;border-radius:999px;
   }
-  .side-badge.buy{color:var(--gain);border:1px solid var(--gain);}
-  .side-badge.sell{color:var(--loss);border:1px solid var(--loss);}
+  .side-badge.buy{color:#fff;background:var(--gain);}
+  .side-badge.sell{color:#fff;background:var(--loss);}
 
   /* ---- 도장 스탬프 (실현손익 표시) ---- */
   .stamp{
     display:inline-flex;align-items:center;gap:6px;
-    font-family:'Nanum Gothic', sans-serif;font-weight:600;font-size:13px;
+    font-family:'Jua', sans-serif;font-weight:400;font-size:13px;
   }
   .stamp .mark{
     width:22px;height:22px;border-radius:50%;
     border:1.6px solid currentColor;
+    background:color-mix(in srgb, currentColor 16%, white);
     display:inline-flex;align-items:center;justify-content:center;
-    font-family:'Nanum Gothic', sans-serif;font-size:12px;font-weight:900;
-    transform:rotate(-8deg);
-    opacity:0.9;
+    font-family:'Jua', sans-serif;font-size:12px;font-weight:400;
+    opacity:0.95;
   }
   .stamp.gain{color:var(--gain);}
   .stamp.loss{color:var(--loss);}
 
-  .empty-row td{color:var(--ink-muted);text-align:center;padding:36px 0;font-family:'Nanum Gothic', sans-serif;}
+  .empty-row td{color:var(--ink-muted);text-align:center;padding:36px 0;font-family:'Jua', sans-serif;}
 
   /* ---------- Owner form ---------- */
-  #ownerPanel{display:none;}
-  #ownerPanel.visible{display:block;}
   .form-grid{
     display:grid;grid-template-columns:repeat(6,1fr);gap:12px;
-    background:var(--panel-2);border:1px solid var(--rule);padding:20px;
+    background:var(--panel-2);border:2px dashed var(--rule-strong);border-radius:var(--radius);padding:20px;
   }
   .form-grid .field{display:flex;flex-direction:column;gap:6px;}
-  .form-grid label{font-size:11px;color:var(--ink-muted);font-family:'Nanum Gothic', sans-serif;}
+  .form-grid label{font-size:11px;color:var(--ink-muted);font-family:'Jua', sans-serif;}
   .suggest-list{
     display:none;position:absolute;top:100%;left:0;right:0;z-index:30;
-    background:var(--panel);border:1px solid var(--rule-strong);
-    max-height:220px;overflow-y:auto;list-style:none;margin:2px 0 0;padding:4px 0;
-    box-shadow:0 6px 16px rgba(20,18,14,0.12);
+    background:var(--panel);border:2px solid var(--rule-strong);border-radius:12px;
+    max-height:220px;overflow-y:auto;list-style:none;margin:4px 0 0;padding:4px 0;
+    box-shadow:0 6px 16px rgba(139,110,60,0.18);
   }
   .suggest-list.visible{display:block;}
   .suggest-list li{padding:8px 12px;cursor:pointer;font-size:13px;}
-  .suggest-list li:hover{background:rgba(201,162,39,0.12);color:var(--gold);}
+  .suggest-list li:hover{background:rgba(255,201,77,0.25);color:#b8860b;}
   .form-grid input, .form-grid select, .form-grid textarea{
-    background:transparent;border:1px solid var(--rule-strong);color:var(--ink);
-    padding:9px 10px;font-size:13px;font-family:'Nanum Gothic', sans-serif;border-radius:var(--radius);
+    background:#fff;border:2px solid var(--rule-strong);color:var(--ink);
+    padding:9px 10px;font-size:13px;font-family:'Jua', sans-serif;border-radius:12px;
   }
   .form-grid .span2{grid-column:span 2;}
   .form-grid .span3{grid-column:span 3;}
@@ -194,38 +219,40 @@
   .form-actions{margin-top:14px;display:flex;gap:10px;justify-content:flex-end;}
   .row-actions button{
     background:none;border:none;color:var(--ink-muted);cursor:pointer;font-size:12px;
-    font-family:'Nanum Gothic', sans-serif;text-decoration:underline;padding:0;margin-right:10px;
+    font-family:'Jua', sans-serif;text-decoration:underline;padding:0;margin-right:10px;
   }
-  .row-actions button:hover{color:var(--gold);}
+  .row-actions button:hover{color:var(--leaf);}
 
-  /* ---------- Modal (login) ---------- */
+  /* ---------- Modal ---------- */
   .modal-backdrop{
-    display:none;position:fixed;inset:0;background:rgba(6,10,16,0.72);
+    display:none;position:fixed;inset:0;background:rgba(91,70,50,0.45);
     align-items:center;justify-content:center;z-index:50;
   }
   .modal-backdrop.visible{display:flex;}
   .modal{
-    background:var(--panel);border:1px solid var(--rule-strong);padding:28px;width:min(340px,90vw);
+    background:var(--panel);border:2px solid var(--rule-strong);border-radius:24px;padding:28px;width:min(340px,90vw);
+    box-shadow:0 14px 32px rgba(91,70,50,0.28);
   }
-  .modal h3{margin:0 0 18px;font-family:'Nanum Gothic', sans-serif;font-size:18px;}
+  .modal h3{margin:0 0 18px;font-family:'Jua', sans-serif;font-size:18px;font-weight:400;}
   .modal .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
   .modal label{font-size:12px;color:var(--ink-muted);}
   .modal input{
-    background:transparent;border:1px solid var(--rule-strong);color:var(--ink);
-    padding:10px;border-radius:var(--radius);font-family:'Nanum Gothic', sans-serif;
+    background:#fff;border:2px solid var(--rule-strong);color:var(--ink);
+    padding:10px;border-radius:12px;font-family:'Jua', sans-serif;
   }
   .modal .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:6px;}
   .modal .error{color:var(--gain);font-size:12px;margin-top:10px;min-height:16px;}
 
   .toast{
     position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-    background:var(--gold);color:#1a1406;padding:10px 20px;border-radius:2px;
+    background:var(--leaf);color:#fff;padding:10px 22px;border-radius:999px;
     font-size:13px;font-weight:700;z-index:60;
+    box-shadow:0 4px 0 var(--leaf-dark);
     opacity:0;transition:opacity .25s;pointer-events:none;
   }
   .toast.visible{opacity:1;}
 
-  footer{margin-top:70px;padding-top:20px;border-top:1px solid var(--rule);color:var(--ink-muted);font-size:12px;font-family:'Nanum Gothic', sans-serif;}
+  footer{margin-top:70px;padding-top:20px;border-top:3px dashed var(--rule);color:var(--ink-muted);font-size:12px;font-family:'Jua', sans-serif;}
 </style>
 </head>
 <body>
@@ -261,53 +288,148 @@
   </div>
   <div style="font-size:11px;color:var(--ink-muted);margin-top:8px;">평가금액·총자산은 네이버 금융 시세 기준이며, 총자산 = 총 실현손익 + 평가금액 (현금은 포함되지 않습니다)</div>
 
-  <!-- 차트 -->
-  <div class="section-head"><span class="eyebrow">02</span><h2>추이 &amp; 종목별 손익</h2><span class="rule"></span></div>
-  <div class="charts">
-    <div class="chart-card">
-      <h3>누적 실현손익 추이</h3>
-      <canvas id="cumulativeChart"></canvas>
-    </div>
-    <div class="chart-card">
-      <h3>종목별 실현손익</h3>
-      <canvas id="tickerChart"></canvas>
-    </div>
+  <!-- 탭 전환 -->
+  <div class="tab-nav">
+    <button type="button" class="tab-btn active" id="tabBtnHoldings">보유·기록</button>
+    <button type="button" class="tab-btn" id="tabBtnAnalysis">손익분석</button>
   </div>
 
-  <!-- 수익금액 조회 (일별/월별) -->
-  <div class="section-head"><span class="eyebrow">03</span><h2>수익금액 조회</h2><span class="rule"></span></div>
-  <div style="display:flex;gap:8px;margin-bottom:14px;">
-    <button type="button" class="btn small" id="periodDailyBtn">일별</button>
-    <button type="button" class="btn small" id="periodMonthlyBtn">월별</button>
-    <button type="button" class="btn small" id="periodTickerBtn">종목별</button>
+  <!-- ===== 탭 1: 보유·기록 ===== -->
+  <div id="tabHoldings" class="tab-panel active">
+
+    <!-- 현재 보유 종목 -->
+    <div class="section-head" style="align-items:center;flex-wrap:wrap;row-gap:10px;">
+      <span class="eyebrow">02</span><h2>현재 보유 종목</h2><span class="rule"></span>
+      <button type="button" class="btn primary small" id="addTradeBtn" style="display:none;">+ 기록 추가</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>종목</th><th class="num">보유수량</th><th class="num">평균단가</th>
+          <th class="num">현재가</th><th class="num">평가금액</th><th class="num">평가손익</th>
+        </tr>
+      </thead>
+      <tbody id="holdingsTableBody">
+        <tr class="empty-row"><td colspan="6">불러오는 중...</td></tr>
+      </tbody>
+    </table>
+
+    <!-- 기록 목록 -->
+    <div class="section-head" style="align-items:center;flex-wrap:wrap;row-gap:10px;">
+      <span class="eyebrow">03</span><h2>매매 기록</h2><span class="rule"></span>
+      <label for="dateSearchInput" style="font-size:12px;color:var(--ink-muted);white-space:nowrap;">날짜 검색</label>
+      <input type="date" id="dateSearchInput" style="background:#fff;border:2px solid var(--rule-strong);color:var(--ink);padding:7px 10px;font-size:13px;border-radius:12px;font-family:'Jua', sans-serif;">
+      <button type="button" class="btn small" id="dateSearchClearBtn">전체보기</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>날짜</th><th>종목</th><th>구분</th><th class="num">수량</th><th class="num">단가</th>
+          <th class="num">실현손익</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="tradeTableBody">
+        <tr class="empty-row"><td colspan="7">불러오는 중...</td></tr>
+      </tbody>
+    </table>
+    <div id="pagination" style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:18px;font-family:'Jua', sans-serif;font-size:13px;"></div>
   </div>
-  <table>
-    <thead>
-      <tr><th id="periodColHeader">날짜</th><th class="num">손익</th></tr>
-    </thead>
-    <tbody id="periodTableBody">
-      <tr class="empty-row"><td colspan="2">불러오는 중...</td></tr>
-    </tbody>
-  </table>
 
-  <!-- 현재 보유 종목 -->
-  <div class="section-head"><span class="eyebrow">04</span><h2>현재 보유 종목</h2><span class="rule"></span></div>
-  <table>
-    <thead>
-      <tr>
-        <th>종목</th><th class="num">보유수량</th><th class="num">평균단가</th>
-        <th class="num">현재가</th><th class="num">평가금액</th><th class="num">평가손익</th>
-      </tr>
-    </thead>
-    <tbody id="holdingsTableBody">
-      <tr class="empty-row"><td colspan="6">불러오는 중...</td></tr>
-    </tbody>
-  </table>
+  <!-- ===== 탭 2: 손익분석 ===== -->
+  <div id="tabAnalysis" class="tab-panel">
 
-  <!-- 기록 추가 (로그인 시에만 표시) -->
-  <div id="ownerPanel">
-    <div class="section-head"><span class="eyebrow">05</span><h2>기록 추가</h2><span class="rule"></span></div>
+    <!-- 차트 -->
+    <div class="section-head"><span class="eyebrow">04</span><h2>추이 &amp; 종목별 손익</h2><span class="rule"></span></div>
+    <div class="charts">
+      <div class="chart-card">
+        <h3>누적 실현손익 추이</h3>
+        <canvas id="cumulativeChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>종목별 실현손익</h3>
+        <canvas id="tickerChart"></canvas>
+      </div>
+    </div>
 
+    <!-- 수익금액 조회 (일별/월별/종목별) -->
+    <div class="section-head"><span class="eyebrow">05</span><h2>수익금액 조회</h2><span class="rule"></span></div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button type="button" class="btn small" id="periodDailyBtn">일별</button>
+      <button type="button" class="btn small" id="periodMonthlyBtn">월별</button>
+      <button type="button" class="btn small" id="periodTickerBtn">종목별</button>
+    </div>
+    <table>
+      <thead>
+        <tr><th id="periodColHeader">날짜</th><th class="num">손익</th></tr>
+      </thead>
+      <tbody id="periodTableBody">
+        <tr class="empty-row"><td colspan="2">불러오는 중...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>기록은 본인 계정으로 로그인해야 추가/수정할 수 있습니다.</footer>
+</div>
+
+<!-- 로그인 모달 -->
+<div class="modal-backdrop" id="loginModal">
+  <div class="modal">
+    <h3>로그인</h3>
+    <div class="field">
+      <label for="loginEmail">이메일</label>
+      <input type="email" id="loginEmail" autocomplete="username">
+    </div>
+    <div class="field">
+      <label for="loginPw">비밀번호</label>
+      <input type="password" id="loginPw" autocomplete="current-password">
+    </div>
+    <div class="error" id="loginError"></div>
+    <div class="modal-actions">
+      <button class="btn" id="loginCancelBtn">닫기</button>
+      <button class="btn primary" id="loginSubmitBtn">로그인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 종목별 상세 팝업 -->
+<div class="modal-backdrop" id="tickerModal">
+  <div class="modal" style="width:min(640px,94vw);max-height:82vh;overflow-y:auto;">
+    <h3 id="tickerModalTitle">종목명</h3>
+    <div id="tickerModalStats" style="display:flex;gap:22px;flex-wrap:wrap;margin-bottom:18px;font-family:'Jua', sans-serif;font-size:13px;color:var(--ink-muted);"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>날짜</th><th>구분</th><th class="num">수량</th><th class="num">단가</th><th class="num">실현손익</th>
+        </tr>
+      </thead>
+      <tbody id="tickerModalTableBody"></tbody>
+    </table>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn" id="tickerModalCloseBtn">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 수익금액 조회 상세 팝업 (일별/월별/종목별 클릭 시) -->
+<div class="modal-backdrop" id="periodDetailModal">
+  <div class="modal" style="width:min(480px,92vw);max-height:80vh;overflow-y:auto;">
+    <h3 id="periodDetailTitle"></h3>
+    <table>
+      <thead>
+        <tr><th id="periodDetailColHeader">항목</th><th class="num">손익</th></tr>
+      </thead>
+      <tbody id="periodDetailTableBody"></tbody>
+    </table>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn" id="periodDetailCloseBtn">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 기록 추가/수정 모달 -->
+<div class="modal-backdrop" id="addTradeModal">
+  <div class="modal" style="width:min(640px,94vw);max-height:88vh;overflow-y:auto;">
+    <h3 id="addTradeModalTitle">기록 추가</h3>
     <form id="tradeForm" class="form-grid">
       <input type="hidden" id="editId">
       <div class="field span2">
@@ -340,87 +462,10 @@
         <input type="text" id="fMemo" placeholder="선택사항">
       </div>
       <div class="form-actions span6">
-        <button type="button" class="btn" id="cancelEditBtn" style="display:none;">취소</button>
+        <button type="button" class="btn" id="cancelEditBtn">취소</button>
         <button type="submit" class="btn primary" id="submitBtn">기록 저장</button>
       </div>
     </form>
-  </div>
-
-  <!-- 기록 목록 -->
-  <div class="section-head"><span class="eyebrow">06</span><h2>매매 기록</h2><span class="rule"></span></div>
-  <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:12px;">
-    <label for="dateSearchInput" style="font-size:12px;color:var(--ink-muted);">날짜 검색</label>
-    <input type="date" id="dateSearchInput" style="background:transparent;border:1px solid var(--rule-strong);color:var(--ink);padding:7px 10px;font-size:13px;border-radius:var(--radius);font-family:'Nanum Gothic', sans-serif;">
-    <button type="button" class="btn small" id="dateSearchClearBtn">전체보기</button>
-  </div>
-  <table>
-    <thead>
-      <tr>
-        <th>날짜</th><th>종목</th><th>구분</th><th class="num">수량</th><th class="num">단가</th>
-        <th class="num">실현손익</th><th></th>
-      </tr>
-    </thead>
-    <tbody id="tradeTableBody">
-      <tr class="empty-row"><td colspan="7">불러오는 중...</td></tr>
-    </tbody>
-  </table>
-  <div id="pagination" style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:18px;font-family:'Nanum Gothic', sans-serif;font-size:13px;"></div>
-
-  <footer>기록은 본인 계정으로 로그인해야 추가/수정할 수 있습니다.</footer>
-</div>
-
-<!-- 로그인 모달 -->
-<div class="modal-backdrop" id="loginModal">
-  <div class="modal">
-    <h3>로그인</h3>
-    <div class="field">
-      <label for="loginEmail">이메일</label>
-      <input type="email" id="loginEmail" autocomplete="username">
-    </div>
-    <div class="field">
-      <label for="loginPw">비밀번호</label>
-      <input type="password" id="loginPw" autocomplete="current-password">
-    </div>
-    <div class="error" id="loginError"></div>
-    <div class="modal-actions">
-      <button class="btn" id="loginCancelBtn">닫기</button>
-      <button class="btn primary" id="loginSubmitBtn">로그인</button>
-    </div>
-  </div>
-</div>
-
-<!-- 종목별 상세 팝업 -->
-<div class="modal-backdrop" id="tickerModal">
-  <div class="modal" style="width:min(640px,94vw);max-height:82vh;overflow-y:auto;">
-    <h3 id="tickerModalTitle">종목명</h3>
-    <div id="tickerModalStats" style="display:flex;gap:22px;flex-wrap:wrap;margin-bottom:18px;font-family:'Nanum Gothic', sans-serif;font-size:13px;color:var(--ink-muted);"></div>
-    <table>
-      <thead>
-        <tr>
-          <th>날짜</th><th>구분</th><th class="num">수량</th><th class="num">단가</th><th class="num">실현손익</th>
-        </tr>
-      </thead>
-      <tbody id="tickerModalTableBody"></tbody>
-    </table>
-    <div class="modal-actions" style="margin-top:16px;">
-      <button class="btn" id="tickerModalCloseBtn">닫기</button>
-    </div>
-  </div>
-</div>
-
-<!-- 수익금액 조회 상세 팝업 (일별/월별/종목별 클릭 시) -->
-<div class="modal-backdrop" id="periodDetailModal">
-  <div class="modal" style="width:min(480px,92vw);max-height:80vh;overflow-y:auto;">
-    <h3 id="periodDetailTitle"></h3>
-    <table>
-      <thead>
-        <tr><th id="periodDetailColHeader">항목</th><th class="num">손익</th></tr>
-      </thead>
-      <tbody id="periodDetailTableBody"></tbody>
-    </table>
-    <div class="modal-actions" style="margin-top:16px;">
-      <button class="btn" id="periodDetailCloseBtn">닫기</button>
-    </div>
   </div>
 </div>
 
@@ -570,12 +615,43 @@ const tickerModal = document.getElementById('tickerModal');
 const tickerModalCloseBtn = document.getElementById('tickerModalCloseBtn');
 const periodDetailModal = document.getElementById('periodDetailModal');
 const periodDetailCloseBtn = document.getElementById('periodDetailCloseBtn');
-const ownerPanel = document.getElementById('ownerPanel');
+const addTradeModal = document.getElementById('addTradeModal');
+const addTradeBtn = document.getElementById('addTradeBtn');
 const tradeForm = document.getElementById('tradeForm');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
 const submitBtn = document.getElementById('submitBtn');
 const tableBody = document.getElementById('tradeTableBody');
 const toastEl = document.getElementById('toast');
+
+// ---------- 탭 전환 ----------
+const tabBtnHoldings = document.getElementById('tabBtnHoldings');
+const tabBtnAnalysis = document.getElementById('tabBtnAnalysis');
+const tabHoldings = document.getElementById('tabHoldings');
+const tabAnalysis = document.getElementById('tabAnalysis');
+tabBtnHoldings.addEventListener('click', ()=>{
+  tabBtnHoldings.classList.add('active'); tabBtnAnalysis.classList.remove('active');
+  tabHoldings.classList.add('active'); tabAnalysis.classList.remove('active');
+});
+tabBtnAnalysis.addEventListener('click', ()=>{
+  tabBtnAnalysis.classList.add('active'); tabBtnHoldings.classList.remove('active');
+  tabAnalysis.classList.add('active'); tabHoldings.classList.remove('active');
+});
+
+// ---------- 기록 추가/수정 모달 ----------
+function openAddTradeModal(){
+  addTradeModal.classList.add('visible');
+}
+function closeAddTradeModal(){
+  addTradeModal.classList.remove('visible');
+}
+addTradeBtn.addEventListener('click', ()=>{
+  resetForm();
+  document.getElementById('addTradeModalTitle').textContent = '기록 추가';
+  openAddTradeModal();
+});
+addTradeModal.addEventListener('click', (e)=>{
+  if(e.target === addTradeModal) closeAddTradeModal();
+});
 
 // 종목명 자동완성: 타이핑할 때만 유사한 종목을 커스텀 드롭다운으로 보여줌
 const fTickerInput = document.getElementById('fTicker');
@@ -673,12 +749,13 @@ onAuthStateChanged(auth, (user)=>{
     authStatus.textContent = user.email;
     loginBtn.style.display = 'none';
     logoutBtn.style.display = 'inline-block';
-    ownerPanel.classList.add('visible');
+    addTradeBtn.style.display = 'inline-block';
   } else {
     authStatus.textContent = '';
     loginBtn.style.display = 'inline-block';
     logoutBtn.style.display = 'none';
-    ownerPanel.classList.remove('visible');
+    addTradeBtn.style.display = 'none';
+    closeAddTradeModal();
     resetForm();
 
     // 이 브라우저에서 처음 접속했고, 로그인 기록이 없다면 자동으로 로그인 창을 띄움
@@ -717,6 +794,7 @@ function computeMetrics(list){
     const fee = Number(t.fee)||0;
     const h = holdings[t.ticker] || { qty:0, avgPrice:0, avgCostBasis:0 };
     let realizedPL = null;
+    let costBasis = null; // 매도한 수량의 매입원가 합계 (수익률 계산용)
 
     if(t.type === 'buy'){
       const newQty = h.qty + qty;
@@ -726,16 +804,25 @@ function computeMetrics(list){
       h.avgCostBasis = newQty > 0 ? (h.qty*h.avgCostBasis + qty*price + fee) / newQty : 0;
       h.qty = newQty;
     } else {
+      costBasis = h.avgCostBasis * qty;
       realizedPL = (price - h.avgCostBasis)*qty - fee;
       h.qty = h.qty - qty;
       cumPL += realizedPL;
       cumSeries.push({ date:t.date, cum:cumPL });
     }
     holdings[t.ticker] = h;
-    enriched.push({ ...t, realizedPL });
+    enriched.push({ ...t, realizedPL, costBasis });
   });
 
   return { enriched, cumSeries, totalPL: cumPL, holdings };
+}
+
+// 손익 금액 옆에 붙일 수익률(%) 문자열 (매입원가 대비)
+function fmtPct(pl, costBasis){
+  if(!costBasis || costBasis <= 0) return '';
+  const pct = (pl / costBasis) * 100;
+  const sign = pct >= 0 ? '+' : '';
+  return ` (${sign}${pct.toFixed(1)}%)`;
 }
 
 let lastSells = [];
@@ -748,8 +835,9 @@ function computeAndRender(){
   const sells = enriched.filter(t=>t.type==='sell');
   lastSells = sells;
   const avgPL = sells.length ? totalPL/sells.length : 0;
+  const totalCostBasis = sells.reduce((s,t)=> s + (t.costBasis||0), 0);
 
-  document.getElementById('statTotalPL').textContent = fmt(totalPL);
+  document.getElementById('statTotalPL').textContent = fmt(totalPL) + fmtPct(totalPL, totalCostBasis);
   document.getElementById('statTotalPL').className = 'value mono ' + (totalPL>0?'gain':totalPL<0?'loss':'');
   document.getElementById('statAvgPL').textContent = fmt(avgPL);
   document.getElementById('statAvgPL').className = 'value mono ' + (avgPL>0?'gain':avgPL<0?'loss':'');
@@ -789,17 +877,19 @@ periodTickerBtn.addEventListener('click', ()=>{
 });
 
 function renderPeriodTable(sells){
-  const map = {};
+  const map = {}; // key -> {pl, cost}
   sells.forEach(t=>{
     const key = periodMode === 'monthly' ? t.date.slice(0,7)
               : periodMode === 'ticker' ? t.ticker
               : t.date;
-    map[key] = (map[key] || 0) + (t.realizedPL || 0);
+    if(!map[key]) map[key] = { pl:0, cost:0 };
+    map[key].pl += (t.realizedPL || 0);
+    map[key].cost += (t.costBasis || 0);
   });
 
   let rows;
   if(periodMode === 'ticker'){
-    rows = Object.entries(map).sort((a,b)=> b[1] - a[1]); // 손익 큰 순
+    rows = Object.entries(map).sort((a,b)=> b[1].pl - a[1].pl); // 손익 큰 순
   } else {
     rows = Object.entries(map).sort((a,b)=> b[0].localeCompare(a[0])); // 최신 순
   }
@@ -813,13 +903,13 @@ function renderPeriodTable(sells){
     return;
   }
 
-  tbody.innerHTML = rows.map(([key, pl])=>{
-    const cls = pl >= 0 ? 'gain' : 'loss';
-    const mark = pl >= 0 ? '益' : '損';
+  tbody.innerHTML = rows.map(([key, v])=>{
+    const cls = v.pl >= 0 ? 'gain' : 'loss';
+    const mark = v.pl >= 0 ? '益' : '損';
     const keyCell = periodMode === 'ticker' ? escapeHtml(key) : key;
     return `<tr>
       <td><span class="ticker-link" data-key="${escapeHtml(key)}">${keyCell}</span></td>
-      <td class="num"><span class="stamp ${cls}"><span class="mark">${mark}</span>${fmt(pl)}</span></td>
+      <td class="num"><span class="stamp ${cls}"><span class="mark">${mark}</span>${fmt(v.pl)}${fmtPct(v.pl, v.cost)}</span></td>
     </tr>`;
   }).join('');
 
@@ -838,33 +928,37 @@ periodDetailModal.addEventListener('click', (e)=>{
 });
 
 function openPeriodDetail(key){
-  let title, colHeader, rows;
+  let title, colHeader, groupFn, filterFn;
 
   if(periodMode === 'daily'){
     // 그 날짜의 종목별 실현손익 내역
     title = `${key} 매매 내역`;
     colHeader = '종목';
-    const items = lastSells.filter(t => t.date === key);
-    const map = {};
-    items.forEach(t => { map[t.ticker] = (map[t.ticker]||0) + (t.realizedPL||0); });
-    rows = Object.entries(map).sort((a,b)=> b[1]-a[1]);
+    filterFn = t => t.date === key;
+    groupFn = t => t.ticker;
   } else if(periodMode === 'monthly'){
     // 그 달의 일자별 손익 내역
     title = `${key} 일별 내역`;
     colHeader = '날짜';
-    const items = lastSells.filter(t => t.date.slice(0,7) === key);
-    const map = {};
-    items.forEach(t => { map[t.date] = (map[t.date]||0) + (t.realizedPL||0); });
-    rows = Object.entries(map).sort((a,b)=> b[0].localeCompare(a[0]));
+    filterFn = t => t.date.slice(0,7) === key;
+    groupFn = t => t.date;
   } else {
     // 종목별: 그 종목의 일자별 손익 내역
     title = `${key} 일별 내역`;
     colHeader = '날짜';
-    const items = lastSells.filter(t => t.ticker === key);
-    const map = {};
-    items.forEach(t => { map[t.date] = (map[t.date]||0) + (t.realizedPL||0); });
-    rows = Object.entries(map).sort((a,b)=> b[0].localeCompare(a[0]));
+    filterFn = t => t.ticker === key;
+    groupFn = t => t.date;
   }
+
+  const items = lastSells.filter(filterFn);
+  const map = {}; // groupKey -> {pl, cost}
+  items.forEach(t=>{
+    const gk = groupFn(t);
+    if(!map[gk]) map[gk] = { pl:0, cost:0 };
+    map[gk].pl += (t.realizedPL || 0);
+    map[gk].cost += (t.costBasis || 0);
+  });
+  const rows = Object.entries(map).sort((a,b)=> b[1].pl - a[1].pl);
 
   document.getElementById('periodDetailTitle').textContent = title;
   document.getElementById('periodDetailColHeader').textContent = colHeader;
@@ -873,12 +967,12 @@ function openPeriodDetail(key){
   if(!rows.length){
     tbody.innerHTML = `<tr class="empty-row"><td colspan="2">내역이 없습니다.</td></tr>`;
   } else {
-    tbody.innerHTML = rows.map(([label, pl])=>{
-      const cls = pl >= 0 ? 'gain' : 'loss';
-      const mark = pl >= 0 ? '益' : '損';
+    tbody.innerHTML = rows.map(([label, v])=>{
+      const cls = v.pl >= 0 ? 'gain' : 'loss';
+      const mark = v.pl >= 0 ? '益' : '損';
       return `<tr>
         <td>${escapeHtml(label)}</td>
-        <td class="num"><span class="stamp ${cls}"><span class="mark">${mark}</span>${fmt(pl)}</span></td>
+        <td class="num"><span class="stamp ${cls}"><span class="mark">${mark}</span>${fmt(v.pl)}${fmtPct(v.pl, v.cost)}</span></td>
       </tr>`;
     }).join('');
   }
@@ -1067,7 +1161,7 @@ function renderCharts(cumSeries, sells){
   });
 }
 
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 10;
 const MAX_PAGE_BUTTONS = 5;
 let currentPage = 1;
 let dateSearchValue = '';
@@ -1321,7 +1415,10 @@ function resetForm(){
   submitBtn.textContent = '기록 저장';
   cancelEditBtn.style.display = 'none';
 }
-cancelEditBtn.addEventListener('click', resetForm);
+cancelEditBtn.addEventListener('click', ()=>{
+  resetForm();
+  closeAddTradeModal();
+});
 fDateInput.value = todayStr(); // 최초 로드 시에도 오늘 날짜로 채워둠
 
 function startEdit(id){
@@ -1337,7 +1434,8 @@ function startEdit(id){
   document.getElementById('fMemo').value = t.memo||'';
   submitBtn.textContent = '수정 저장';
   cancelEditBtn.style.display = 'inline-block';
-  window.scrollTo({top: ownerPanel.offsetTop - 20, behavior:'smooth'});
+  document.getElementById('addTradeModalTitle').textContent = '기록 수정';
+  openAddTradeModal();
 }
 
 async function deleteTrade(id){
@@ -1383,6 +1481,7 @@ tradeForm.addEventListener('submit', async (e)=>{
     }
     addCustomStockName(payload.ticker);
     resetForm();
+    closeAddTradeModal();
   }catch(e){
     console.error(e);
     toast('저장 실패: 권한 또는 네트워크를 확인하세요');
