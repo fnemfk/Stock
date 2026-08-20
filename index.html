@@ -91,6 +91,21 @@
     outline:3px solid var(--gold); outline-offset:2px;
   }
 
+  /* ---------- Mobile optimization ---------- */
+  @media (max-width:600px){
+    .wrap{padding:0 14px 60px;}
+    .section-head{margin:32px 0 16px;}
+    input, select, textarea{font-size:16px !important;} /* iOS 자동 확대(zoom) 방지 */
+    .btn{padding:10px 16px;}
+    .page-btn{min-width:38px;height:38px;} /* 터치 영역 확보 */
+    #authArea{font-size:12px;}
+    #authStatus{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .tab-btn{flex:1 1 auto;text-align:center;padding:10px 12px;font-size:14px;}
+  }
+  @media (max-width:420px){
+    .stats{grid-template-columns:1fr;}
+  }
+
   /* ---------- Tabs ---------- */
   .tab-nav{display:flex;gap:10px;margin:28px 0 8px;flex-wrap:wrap;}
   .tab-btn{
@@ -141,10 +156,17 @@
   @media (max-width:760px){ .charts{grid-template-columns:1fr;} }
 
   /* ---------- Table ---------- */
+  .table-scroll{
+    overflow-x:auto;-webkit-overflow-scrolling:touch;
+    border:2px solid var(--rule);border-radius:var(--radius);
+    box-shadow:0 4px 0 var(--rule);
+  }
   table{
     width:100%;border-collapse:separate;border-spacing:0;font-size:14px;
-    border:2px solid var(--rule);border-radius:var(--radius);overflow:hidden;
-    box-shadow:0 4px 0 var(--rule);
+  }
+  .table-wide{min-width:560px;}
+  @media (max-width:600px){
+    table{font-size:13px;}
   }
   thead th{
     text-align:left;font-weight:400;color:var(--ink-muted);
@@ -300,7 +322,8 @@
       <span class="eyebrow">02</span><h2>현재 보유 종목</h2><span class="rule"></span>
       <button type="button" class="btn primary small" id="addTradeBtn" style="display:none;">+ 기록 추가</button>
     </div>
-    <table>
+    <div class="table-scroll">
+    <table class="table-wide">
       <thead>
         <tr>
           <th>종목</th><th class="num">보유수량</th><th class="num">평균단가</th>
@@ -311,6 +334,7 @@
         <tr class="empty-row"><td colspan="6">불러오는 중...</td></tr>
       </tbody>
     </table>
+    </div>
 
     <!-- 기록 목록 -->
     <div class="section-head" style="align-items:center;flex-wrap:wrap;row-gap:10px;">
@@ -319,7 +343,8 @@
       <input type="date" id="dateSearchInput" style="background:#fff;border:2px solid var(--rule-strong);color:var(--ink);padding:7px 10px;font-size:13px;border-radius:12px;font-family:'Gowun Dodum', sans-serif;">
       <button type="button" class="btn small" id="dateSearchClearBtn">전체보기</button>
     </div>
-    <table>
+    <div class="table-scroll">
+    <table class="table-wide">
       <thead>
         <tr>
           <th>날짜</th><th>종목</th><th>구분</th><th class="num">수량</th><th class="num">단가</th>
@@ -330,7 +355,8 @@
         <tr class="empty-row"><td colspan="7">불러오는 중...</td></tr>
       </tbody>
     </table>
-    <div id="pagination" style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:18px;font-family:'Gowun Dodum', sans-serif;font-size:13px;"></div>
+    </div>
+    <div id="pagination" style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:18px;font-family:'Gowun Dodum', sans-serif;font-size:13px;flex-wrap:wrap;"></div>
   </div>
 
   <!-- ===== 탭 2: 손익분석 ===== -->
@@ -356,6 +382,7 @@
       <button type="button" class="btn small" id="periodMonthlyBtn">월별</button>
       <button type="button" class="btn small" id="periodTickerBtn">종목별</button>
     </div>
+    <div class="table-scroll">
     <table>
       <thead>
         <tr><th id="periodColHeader">날짜</th><th class="num">손익</th></tr>
@@ -364,6 +391,7 @@
         <tr class="empty-row"><td colspan="2">불러오는 중...</td></tr>
       </tbody>
     </table>
+    </div>
   </div>
 
   <footer>기록은 본인 계정으로 로그인해야 추가/수정할 수 있습니다.</footer>
@@ -394,7 +422,8 @@
   <div class="modal" style="width:min(640px,94vw);max-height:82vh;overflow-y:auto;">
     <h3 id="tickerModalTitle">종목명</h3>
     <div id="tickerModalStats" style="display:flex;gap:22px;flex-wrap:wrap;margin-bottom:18px;font-family:'Gowun Dodum', sans-serif;font-size:13px;color:var(--ink-muted);"></div>
-    <table>
+    <div class="table-scroll">
+    <table class="table-wide">
       <thead>
         <tr>
           <th>날짜</th><th>구분</th><th class="num">수량</th><th class="num">단가</th><th class="num">실현손익</th>
@@ -402,6 +431,7 @@
       </thead>
       <tbody id="tickerModalTableBody"></tbody>
     </table>
+    </div>
     <div class="modal-actions" style="margin-top:16px;">
       <button class="btn" id="tickerModalCloseBtn">닫기</button>
     </div>
@@ -412,12 +442,14 @@
 <div class="modal-backdrop" id="periodDetailModal">
   <div class="modal" style="width:min(480px,92vw);max-height:80vh;overflow-y:auto;">
     <h3 id="periodDetailTitle"></h3>
+    <div class="table-scroll">
     <table>
       <thead>
         <tr><th id="periodDetailColHeader">항목</th><th class="num">손익</th></tr>
       </thead>
       <tbody id="periodDetailTableBody"></tbody>
     </table>
+    </div>
     <div class="modal-actions" style="margin-top:16px;">
       <button class="btn" id="periodDetailCloseBtn">닫기</button>
     </div>
@@ -495,8 +527,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 setPersistence(auth, browserLocalPersistence); // 로그인 상태를 브라우저에 유지 (재방문 시 재로그인 불필요)
-
-const AUTO_PROMPT_KEY = 'journal_login_prompted_v1';
 
 let currentUser = null;
 let trades = [];
@@ -716,11 +746,9 @@ function fmt(n){
 function openLoginModal(){
   loginModal.classList.add('visible');
   loginError.textContent = '';
-  localStorage.setItem(AUTO_PROMPT_KEY, '1'); // 자동 팝업은 한 번만
 }
 function closeLoginModal(){
   loginModal.classList.remove('visible');
-  localStorage.setItem(AUTO_PROMPT_KEY, '1');
 }
 loginBtn.addEventListener('click', openLoginModal);
 loginCancelBtn.addEventListener('click', closeLoginModal);
@@ -755,13 +783,6 @@ onAuthStateChanged(auth, (user)=>{
     addTradeBtn.style.display = 'none';
     closeAddTradeModal();
     resetForm();
-
-    // 이 브라우저에서 처음 접속했고, 로그인 기록이 없다면 자동으로 로그인 창을 띄움
-    if(!authResolvedOnce && !localStorage.getItem(AUTO_PROMPT_KEY)){
-      loginModal.classList.add('visible');
-      loginError.textContent = '';
-      localStorage.setItem(AUTO_PROMPT_KEY, '1');
-    }
   }
   authResolvedOnce = true;
   renderTable(); // 소유자 여부에 따라 수정/삭제 버튼 표시가 달라짐
