@@ -643,7 +643,7 @@ const STOCK_CODES = {
 "BNK금융지주":"138930","DGB금융지주":"139130","JB금융지주":"175330","메리츠금융지주":"138040",
 "DB손해보험":"005830","현대해상":"001450","삼성카드":"029780","교보증권":"030610",
 "현대차증권":"001500","LX세미콘":"108320","솔브레인":"357780","이수페타시스":"007660",
-"빅텍":"065450","삼화콘덴서":"001820","주성엔지니어링":"036930","원익IPS":"240810"
+"빅텍":"065450","삼화콘덴서":"001820","주성엔지니어링":"036930"
 };
 
 // 사용자가 직접 입력했던 종목명도 자동완성 목록에 합치기 (브라우저에 저장됨)
@@ -812,7 +812,7 @@ onAuthStateChanged(auth, (user)=>{
 
 // ---------- Firestore live data ----------
 const tradesCol = collection(db, 'trades');
-const tradesQuery = query(tradesCol, orderBy('date', 'asc'));
+const tradesQuery = query(tradesCol, orderBy('date', 'asc'), orderBy('createdAt', 'asc'));
 onSnapshot(tradesQuery, (snap)=>{
   trades = [];
   snap.forEach(d => trades.push({ id:d.id, ...d.data() }));
