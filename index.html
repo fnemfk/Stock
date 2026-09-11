@@ -329,6 +329,15 @@
   </div>
   <div style="font-size:11px;color:var(--ink-muted);margin-top:8px;">평가금액·총자산은 네이버 금융 시세 기준이며, 총자산 = 총 실현손익 + 평가금액 (현금은 포함되지 않습니다)</div>
 
+  <div id="principalArea" style="margin-top:14px;padding:16px 18px;background:var(--panel-2);border:2px dashed var(--rule-strong);border-radius:16px;font-size:13px;">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span style="color:var(--ink-muted);">원금</span>
+      <span class="mono" id="principalDisplay" style="font-size:15px;">설정 안 됨</span>
+      <button type="button" class="btn small" id="principalEditBtn" style="display:none;">수정</button>
+    </div>
+    <div id="principalCompare" style="margin-top:8px;color:var(--ink-muted);line-height:1.6;"></div>
+  </div>
+
   <!-- 탭 전환 -->
   <div class="tab-nav">
     <button type="button" class="tab-btn active" id="tabBtnHoldings">보유·기록</button>
@@ -565,7 +574,7 @@ import {
   setPersistence, browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import {
-  getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
+  getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, setDoc,
   onSnapshot, query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
@@ -844,6 +853,7 @@ onAuthStateChanged(auth, (user)=>{
   authResolvedOnce = true;
   renderTable(); // 소유자 여부에 따라 수정/삭제 버튼 표시가 달라짐
   renderMemoList(); // 메모 작성/삭제 버튼 표시도 소유자 여부에 따라 갱신
+  renderPrincipalArea(); // 원금 수정 버튼 표시도 소유자 여부에 따라 갱신
 });
 
 // 매매 기록 정렬 기준: 날짜 → (입력했다면) 시간 → 등록순서(createdAt)
@@ -919,6 +929,8 @@ function fmtPct(pl, costBasis){
 
 let lastSells = [];
 let periodMode = 'daily';
+let investedAmount = 0;
+let totalPLGlobal = 0;
 
 function computeAndRender(){
   const { enriched, cumSeries, totalPL, holdings } = computeMetrics(trades);
@@ -928,6 +940,13 @@ function computeAndRender(){
   lastSells = sells;
   const avgPL = sells.length ? totalPL/sells.length : 0;
   const totalCostBasis = sells.reduce((s,t)=> s + (t.costBasis||0), 0);
+
+  // 현재 보유 중인 종목들의 매입원가 합계 (지금 얼마가 물려있는지)
+  investedAmount = Object.values(holdings)
+    .filter(h => Math.round(h.qty) > 0)
+    .reduce((s,h)=> s + h.avgCostBasis * h.qty, 0);
+  totalPLGlobal = totalPL;
+  renderPrincipalArea();
 
   document.getElementById('statTotalPL').textContent = fmt(totalPL) + fmtPct(totalPL, totalCostBasis);
   document.getElementById('statTotalPL').className = 'value mono ' + (totalPL>0?'gain':totalPL<0?'loss':'');
@@ -1749,6 +1768,64 @@ onSnapshot(memosCol, (snap)=>{
   renderMemoList();
 }, (err)=>{
   console.error(err);
+});
+
+// ---------- 원금 비교 ----------
+let principalValue = null;
+const principalDocRef = doc(db, 'settings', 'principal');
+
+function renderPrincipalArea(){
+  const displayEl = document.getElementById('principalDisplay');
+  const compareEl = document.getElementById('principalCompare');
+  const editBtn = document.getElementById('principalEditBtn');
+  if(!displayEl) return; // computeAndRender가 principalValue 구독보다 먼저 한 번 돌 수 있어 안전장치
+  editBtn.style.display = currentUser ? 'inline-block' : 'none';
+
+  if(principalValue === null){
+    displayEl.textContent = '설정 안 됨';
+    compareEl.textContent = currentUser ? '오른쪽 "수정" 버튼으로 원금을 입력해보세요.' : '';
+    return;
+  }
+  displayEl.textContent = fmt(principalValue) + '원';
+
+  const diff = investedAmount - principalValue; // 원금보다 지금 얼마나 더/덜 물려있는지
+  const gap = diff - totalPLGlobal; // 실현손익만으로 설명되는지 (재투자 여부 확인용)
+  const tolerance = Math.max(50000, Math.abs(principalValue) * 0.01); // 오차 허용범위 (5만원 또는 원금의 1%)
+  const matched = Math.abs(gap) <= tolerance;
+
+  compareEl.innerHTML =
+    `현재 투입금액(보유종목 매입원가 합): <b>${fmt(investedAmount)}원</b><br>` +
+    `투입금액 − 원금 = <b>${diff>=0?'+':''}${fmt(diff)}원</b> ` +
+    `(총 실현손익 ${fmt(totalPLGlobal)}원과 비교: ` +
+    (matched
+      ? `거의 일치 ✅ 실현손익을 인출하지 않고 재투자한 것으로 설명됩니다`
+      : `차이 ${gap>=0?'+':''}${fmt(gap)}원 — 원금 외 자금이 섞였을 수 있어 확인이 필요해요`) +
+    `)`;
+}
+
+onSnapshot(principalDocRef, (snap)=>{
+  principalValue = snap.exists() ? (snap.data().amount ?? null) : null;
+  renderPrincipalArea();
+}, (err)=>{
+  console.error(err);
+});
+
+document.getElementById('principalEditBtn').addEventListener('click', async ()=>{
+  if(!currentUser) return;
+  const input = prompt('원금을 숫자로 입력하세요 (예: 20000000)', principalValue !== null ? principalValue : '');
+  if(input === null) return; // 취소
+  const parsed = Number(String(input).replace(/,/g,'').trim());
+  if(!parsed || parsed <= 0){
+    toast('올바른 숫자를 입력하세요');
+    return;
+  }
+  try{
+    await setDoc(principalDocRef, { amount: parsed, updatedAt: serverTimestamp() });
+    toast('원금이 저장되었습니다');
+  }catch(e){
+    console.error(e);
+    toast('저장 실패: 권한 또는 네트워크를 확인하세요');
+  }
 });
 </script>
 </body>
