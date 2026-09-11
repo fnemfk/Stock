@@ -1227,10 +1227,11 @@ function renderTable(){
     document.getElementById('pagination').innerHTML = '';
     return;
   }
-  // 입력한 순서(최근 저장한 기록이 위로) 기준 정렬
+  // 날짜순 정렬 (최신 날짜가 위로, 같은 날짜면 나중에 등록한 기록이 위로)
   let rows = [...trades].sort((a,b)=>{
-    const at = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : Date.now();
-    const bt = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : Date.now();
+    if(a.date !== b.date) return b.date.localeCompare(a.date);
+    const at = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+    const bt = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
     return bt - at;
   });
 
@@ -1337,8 +1338,9 @@ function openTickerDetail(ticker){
   const rows = trades
     .filter(t => t.ticker === ticker)
     .sort((a,b)=>{
-      const at = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : Date.now();
-      const bt = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : Date.now();
+      if(a.date !== b.date) return b.date.localeCompare(a.date);
+      const at = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+      const bt = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
       return bt - at;
     });
 
