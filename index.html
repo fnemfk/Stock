@@ -299,9 +299,11 @@
 
 <div class="wrap">
   <header>
-    <button type="button" class="btn small" id="memoBtn" style="margin-right:auto;">📝 메모</button>
-    <div id="authArea">
+    <div style="display:flex;gap:8px;margin-right:auto;">
+      <button type="button" class="btn small" id="memoBtn">📝 메모</button>
       <button type="button" class="btn small" id="principalBtn">원금</button>
+    </div>
+    <div id="authArea">
       <span id="authStatus" class="mono" style="color:var(--ink-muted);"></span>
       <button class="btn small" id="loginBtn">로그인</button>
       <button class="btn small" id="logoutBtn" style="display:none;">로그아웃</button>
@@ -1816,13 +1818,14 @@ function renderPrincipalArea(){
   const matched = Math.abs(gap) <= tolerance;
 
   compareEl.innerHTML =
-    `현재 투입금액(보유종목 매입원가 합): <b>${fmt(investedAmount)}원</b><br>` +
-    `투입금액 − 원금 = <b>${diff>=0?'+':''}${fmt(diff)}원</b> ` +
-    `(총 실현손익 ${fmt(totalPLGlobal)}원과 비교: ` +
-    (matched
-      ? `거의 일치 ✅ 실현손익을 인출하지 않고 재투자한 것으로 설명됩니다`
-      : `차이 ${gap>=0?'+':''}${fmt(gap)}원 — 원금 외 자금이 섞였을 수 있어 확인이 필요해요`) +
-    `)`;
+    `<div style="margin-bottom:10px;">현재 투입금액(보유종목 매입원가 합)<br><b style="font-size:15px;color:var(--ink);">${fmt(investedAmount)}원</b></div>` +
+    `<div style="margin-bottom:10px;">투입금액 − 원금<br><b style="font-size:15px;color:var(--ink);">${diff>=0?'+':''}${fmt(diff)}원</b></div>` +
+    `<div style="padding-top:10px;border-top:1px dashed var(--rule);">` +
+      `총 실현손익 ${fmt(totalPLGlobal)}원과 비교:<br>` +
+      (matched
+        ? `거의 일치 ✅ 실현손익을 인출하지 않고 재투자한 것으로 설명됩니다`
+        : `차이 ${gap>=0?'+':''}${fmt(gap)}원 — 원금 외 자금이 섞였을 수 있어 확인이 필요해요`) +
+    `</div>`;
 }
 
 onSnapshot(principalDocRef, (snap)=>{
