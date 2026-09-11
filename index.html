@@ -1400,7 +1400,7 @@ function openTickerDetail(ticker){
 // 수수료율 (나무증권 우대수수료 기준, 화면에는 노출하지 않고 내부적으로만 사용)
 const FEE_RATE_BUY = 0.0043319;   // 매수 수수료율(%)
 const FEE_RATE_SELL = 0.0043319;  // 매도 수수료율(%)
-const TAX_RATE_SELL = 0.15;       // 매도 세금(%)
+const TAX_RATE_SELL = 0.20;       // 매도 세금(%) - 증권사 실제 평가손익과 비교해 보정한 값
 
 const fDateInput = document.getElementById('fDate');
 const fQtyInput = document.getElementById('fQty');
