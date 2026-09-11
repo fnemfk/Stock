@@ -301,6 +301,7 @@
   <header>
     <button type="button" class="btn small" id="memoBtn" style="margin-right:auto;">📝 메모</button>
     <div id="authArea">
+      <button type="button" class="btn small" id="principalBtn">원금</button>
       <span id="authStatus" class="mono" style="color:var(--ink-muted);"></span>
       <button class="btn small" id="loginBtn">로그인</button>
       <button class="btn small" id="logoutBtn" style="display:none;">로그아웃</button>
@@ -328,15 +329,6 @@
     </div>
   </div>
   <div style="font-size:11px;color:var(--ink-muted);margin-top:8px;">평가금액·총자산은 네이버 금융 시세 기준이며, 총자산 = 총 실현손익 + 평가금액 (현금은 포함되지 않습니다)</div>
-
-  <div id="principalArea" style="margin-top:14px;padding:16px 18px;background:var(--panel-2);border:2px dashed var(--rule-strong);border-radius:16px;font-size:13px;">
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <span style="color:var(--ink-muted);">원금</span>
-      <span class="mono" id="principalDisplay" style="font-size:15px;">설정 안 됨</span>
-      <button type="button" class="btn small" id="principalEditBtn" style="display:none;">수정</button>
-    </div>
-    <div id="principalCompare" style="margin-top:8px;color:var(--ink-muted);line-height:1.6;"></div>
-  </div>
 
   <!-- 탭 전환 -->
   <div class="tab-nav">
@@ -451,6 +443,21 @@
     <div class="modal-actions">
       <button class="btn" id="loginCancelBtn">닫기</button>
       <button class="btn primary" id="loginSubmitBtn">로그인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 원금 보기 모달 -->
+<div class="modal-backdrop" id="principalViewModal">
+  <div class="modal" style="width:min(400px,92vw);">
+    <h3>원금</h3>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span class="mono" id="principalDisplay" style="font-size:17px;">설정 안 됨</span>
+      <button type="button" class="btn small" id="principalEditBtn" style="display:none;">수정</button>
+    </div>
+    <div id="principalCompare" style="margin-top:12px;color:var(--ink-muted);line-height:1.6;font-size:13px;"></div>
+    <div class="modal-actions" style="margin-top:18px;">
+      <button class="btn" id="principalViewCloseBtn">닫기</button>
     </div>
   </div>
 </div>
@@ -1823,6 +1830,18 @@ onSnapshot(principalDocRef, (snap)=>{
   renderPrincipalArea();
 }, (err)=>{
   console.error(err);
+});
+
+const principalViewModal = document.getElementById('principalViewModal');
+const principalViewCloseBtn = document.getElementById('principalViewCloseBtn');
+document.getElementById('principalBtn').addEventListener('click', ()=>{
+  principalViewModal.classList.add('visible');
+});
+principalViewCloseBtn.addEventListener('click', ()=>{
+  principalViewModal.classList.remove('visible');
+});
+principalViewModal.addEventListener('click', (e)=>{
+  if(e.target === principalViewModal) principalViewModal.classList.remove('visible');
 });
 
 const principalModal = document.getElementById('principalModal');
