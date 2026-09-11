@@ -455,6 +455,21 @@
   </div>
 </div>
 
+<!-- 원금 입력 모달 -->
+<div class="modal-backdrop" id="principalModal">
+  <div class="modal" style="width:min(360px,92vw);">
+    <h3>원금 입력</h3>
+    <div class="field">
+      <label for="principalInput">원금 (원)</label>
+      <input type="text" id="principalInput" inputmode="numeric" placeholder="0">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="principalCancelBtn">취소</button>
+      <button class="btn primary" id="principalSaveBtn">저장</button>
+    </div>
+  </div>
+</div>
+
 <!-- 메모 모달 -->
 <div class="modal-backdrop" id="memoModal">
   <div class="modal" style="width:min(480px,92vw);max-height:82vh;overflow-y:auto;">
@@ -1810,11 +1825,30 @@ onSnapshot(principalDocRef, (snap)=>{
   console.error(err);
 });
 
-document.getElementById('principalEditBtn').addEventListener('click', async ()=>{
+const principalModal = document.getElementById('principalModal');
+const principalInput = document.getElementById('principalInput');
+const principalCancelBtn = document.getElementById('principalCancelBtn');
+const principalSaveBtn = document.getElementById('principalSaveBtn');
+
+principalInput.addEventListener('input', ()=>{
+  const raw = parseNumber(principalInput.value);
+  principalInput.value = raw ? raw.toLocaleString('ko-KR') : '';
+});
+
+document.getElementById('principalEditBtn').addEventListener('click', ()=>{
   if(!currentUser) return;
-  const input = prompt('원금을 숫자로 입력하세요 (예: 20000000)', principalValue !== null ? principalValue : '');
-  if(input === null) return; // 취소
-  const parsed = Number(String(input).replace(/,/g,'').trim());
+  principalInput.value = principalValue !== null ? principalValue.toLocaleString('ko-KR') : '';
+  principalModal.classList.add('visible');
+});
+principalCancelBtn.addEventListener('click', ()=>{
+  principalModal.classList.remove('visible');
+});
+principalModal.addEventListener('click', (e)=>{
+  if(e.target === principalModal) principalModal.classList.remove('visible');
+});
+principalSaveBtn.addEventListener('click', async ()=>{
+  if(!currentUser) return;
+  const parsed = parseNumber(principalInput.value);
   if(!parsed || parsed <= 0){
     toast('올바른 숫자를 입력하세요');
     return;
@@ -1822,6 +1856,7 @@ document.getElementById('principalEditBtn').addEventListener('click', async ()=>
   try{
     await setDoc(principalDocRef, { amount: parsed, updatedAt: serverTimestamp() });
     toast('원금이 저장되었습니다');
+    principalModal.classList.remove('visible');
   }catch(e){
     console.error(e);
     toast('저장 실패: 권한 또는 네트워크를 확인하세요');
