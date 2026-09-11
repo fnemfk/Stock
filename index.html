@@ -369,12 +369,12 @@
     <table class="table-wide">
       <thead>
         <tr>
-          <th>날짜</th><th>종목</th><th>구분</th><th class="num">수량</th><th class="num">단가</th>
+          <th>날짜</th><th>시간</th><th>종목</th><th>구분</th><th class="num">수량</th><th class="num">단가</th>
           <th class="num">실현손익</th><th></th>
         </tr>
       </thead>
       <tbody id="tradeTableBody">
-        <tr class="empty-row"><td colspan="7">불러오는 중...</td></tr>
+        <tr class="empty-row"><td colspan="8">불러오는 중...</td></tr>
       </tbody>
     </table>
     </div>
@@ -448,7 +448,7 @@
     <table class="table-wide">
       <thead>
         <tr>
-          <th>날짜</th><th>구분</th><th class="num">수량</th><th class="num">단가</th><th class="num">실현손익</th>
+          <th>날짜</th><th>시간</th><th>구분</th><th class="num">수량</th><th class="num">단가</th><th class="num">실현손익</th>
         </tr>
       </thead>
       <tbody id="tickerModalTableBody"></tbody>
@@ -489,7 +489,7 @@
         <input type="text" id="fDate" inputmode="numeric" placeholder="YYYYMMDD" maxlength="10" required>
       </div>
       <div class="field span2">
-        <label for="fTime">시간 (선택, 같은 날짜 순서 조정용)</label>
+        <label for="fTime">시간</label>
         <input type="time" id="fTime">
       </div>
       <div class="field span2" style="position:relative;">
@@ -838,7 +838,7 @@ onSnapshot(tradesQuery, (snap)=>{
   computeAndRender();
 }, (err)=>{
   console.error(err);
-  tableBody.innerHTML = `<tr class="empty-row"><td colspan="7">데이터를 불러올 수 없습니다. Firebase 설정을 확인하세요.</td></tr>`;
+  tableBody.innerHTML = `<tr class="empty-row"><td colspan="8">데이터를 불러올 수 없습니다. Firebase 설정을 확인하세요.</td></tr>`;
 });
 
 // ---------- 손익 계산 (가중평균 원가법) ----------
@@ -1247,7 +1247,7 @@ dateSearchClearBtn.addEventListener('click', ()=>{
 
 function renderTable(){
   if(!trades.length){
-    tableBody.innerHTML = `<tr class="empty-row"><td colspan="7">아직 기록이 없습니다.</td></tr>`;
+    tableBody.innerHTML = `<tr class="empty-row"><td colspan="8">아직 기록이 없습니다.</td></tr>`;
     document.getElementById('pagination').innerHTML = '';
     return;
   }
@@ -1260,7 +1260,7 @@ function renderTable(){
   }
 
   if(!rows.length){
-    tableBody.innerHTML = `<tr class="empty-row"><td colspan="7">해당 날짜의 기록이 없습니다.</td></tr>`;
+    tableBody.innerHTML = `<tr class="empty-row"><td colspan="8">해당 날짜의 기록이 없습니다.</td></tr>`;
     document.getElementById('pagination').innerHTML = '';
     return;
   }
@@ -1285,6 +1285,7 @@ function renderTable(){
       : '';
     return `<tr>
       <td>${t.date}</td>
+      <td>${t.time ? escapeHtml(t.time) : '<span style="color:var(--ink-muted);">—</span>'}</td>
       <td class="ticker-cell">${escapeHtml(t.ticker)}</td>
       <td><span class="side-badge ${t.type}">${t.type==='buy'?'매수':'매도'}</span></td>
       <td class="num">${fmt(t.quantity)}</td>
@@ -1394,6 +1395,7 @@ function openTickerDetail(ticker){
       : `<span class="mono" style="color:var(--ink-muted);">—</span>`;
     return `<tr>
       <td>${t.date}</td>
+      <td>${t.time ? escapeHtml(t.time) : '<span style="color:var(--ink-muted);">—</span>'}</td>
       <td><span class="side-badge ${t.type}">${t.type==='buy'?'매수':'매도'}</span></td>
       <td class="num">${fmt(t.quantity)}</td>
       <td class="num">${fmt(t.price)}</td>
