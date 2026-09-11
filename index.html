@@ -389,7 +389,13 @@
     <div class="section-head"><span class="eyebrow">04</span><h2>추이 &amp; 종목별 손익</h2><span class="rule"></span></div>
     <div class="charts">
       <div class="chart-card">
-        <h3>누적 실현손익 추이</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+          <h3 id="cumulativeChartTitle" style="margin:0;">일별 실현손익</h3>
+          <div style="display:flex;gap:6px;">
+            <button type="button" class="btn small" id="chartModeDailyBtn">일별</button>
+            <button type="button" class="btn small" id="chartModeCumulativeBtn">누적</button>
+          </div>
+        </div>
         <canvas id="cumulativeChart"></canvas>
       </div>
       <div class="chart-card">
@@ -928,7 +934,7 @@ function computeAndRender(){
   document.getElementById('statAvgPL').textContent = fmt(avgPL);
   document.getElementById('statAvgPL').className = 'value mono ' + (avgPL>0?'gain':avgPL<0?'loss':'');
 
-  renderCharts(cumSeries, sells);
+  renderCharts(sells);
   renderPeriodTable(lastSells);
   renderHoldings(holdings, totalPL);
   renderTable();
@@ -1210,25 +1216,68 @@ function renderHoldings(holdings, totalPL){
   }
 }
 
-function renderCharts(cumSeries, sells){
-  const ctx1 = document.getElementById('cumulativeChart');
-  const labels1 = cumSeries.map(p=>p.date);
-  const data1 = cumSeries.map(p=>p.cum);
-  if(cumulativeChart) cumulativeChart.destroy();
-  cumulativeChart = new Chart(ctx1, {
-    type:'line',
-    data:{ labels:labels1, datasets:[{
-      data:data1, borderColor:'#c9a227', backgroundColor:'rgba(201,162,39,0.12)',
-      fill:true, tension:0.15, pointRadius:2
-    }]},
-    options:{
-      plugins:{legend:{display:false}},
-      scales:{
-        x:{ticks:{color:'#6b6f76', maxRotation:0, autoSkip:true}, grid:{color:'rgba(20,18,14,0.08)'}},
-        y:{ticks:{color:'#6b6f76'}, grid:{color:'rgba(20,18,14,0.08)'}}
-      }
-    }
+let chartMode = 'daily'; // 'daily' | 'cumulative'
+
+function updateChartModeButtons(){
+  document.getElementById('chartModeDailyBtn').classList.toggle('primary', chartMode==='daily');
+  document.getElementById('chartModeCumulativeBtn').classList.toggle('primary', chartMode==='cumulative');
+  document.getElementById('cumulativeChartTitle').textContent = chartMode==='daily' ? '일별 실현손익' : '누적 실현손익 추이';
+}
+document.getElementById('chartModeDailyBtn').addEventListener('click', ()=>{
+  chartMode = 'daily';
+  updateChartModeButtons();
+  renderCharts(lastSells);
+});
+document.getElementById('chartModeCumulativeBtn').addEventListener('click', ()=>{
+  chartMode = 'cumulative';
+  updateChartModeButtons();
+  renderCharts(lastSells);
+});
+updateChartModeButtons();
+
+function renderCharts(sells){
+  // 날짜별로 실현손익을 합산 (같은 날 여러 건이어도 하루 한 칸으로 표시)
+  const dailyMap = {};
+  sells.forEach(t=>{
+    dailyMap[t.date] = (dailyMap[t.date]||0) + (t.realizedPL||0);
   });
+  const dates = Object.keys(dailyMap).sort(); // 오름차순 (과거 -> 최근)
+
+  const ctx1 = document.getElementById('cumulativeChart');
+  if(cumulativeChart) cumulativeChart.destroy();
+
+  if(chartMode === 'daily'){
+    const values = dates.map(d=>dailyMap[d]);
+    const colors = values.map(v=> v>=0 ? '#e1483c' : '#3b82c4');
+    cumulativeChart = new Chart(ctx1, {
+      type:'bar',
+      data:{ labels:dates, datasets:[{ data:values, backgroundColor:colors }] },
+      options:{
+        plugins:{legend:{display:false}},
+        scales:{
+          x:{ticks:{color:'#6b6f76', maxRotation:0, autoSkip:true}, grid:{display:false}},
+          y:{ticks:{color:'#6b6f76'}, grid:{color:'rgba(20,18,14,0.08)'}}
+        }
+      }
+    });
+  } else {
+    let cum = 0;
+    const values = dates.map(d=>{ cum += dailyMap[d]; return cum; });
+    cumulativeChart = new Chart(ctx1, {
+      type:'line',
+      data:{ labels:dates, datasets:[{
+        data:values, borderColor:'#c9a227', backgroundColor:'rgba(201,162,39,0.12)',
+        fill:true, tension:0.15, pointRadius:2
+      }]},
+      options:{
+        plugins:{legend:{display:false}},
+        scales:{
+          x:{ticks:{color:'#6b6f76', maxRotation:0, autoSkip:true}, grid:{color:'rgba(20,18,14,0.08)'}},
+          y:{ticks:{color:'#6b6f76'}, grid:{color:'rgba(20,18,14,0.08)'}}
+        }
+      }
+    });
+  }
 
   const byTicker = {};
   sells.forEach(t=>{ byTicker[t.ticker] = (byTicker[t.ticker]||0) + (t.realizedPL||0); });
