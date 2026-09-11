@@ -299,6 +299,7 @@
 
 <div class="wrap">
   <header>
+    <button type="button" class="btn small" id="memoBtn" style="margin-right:auto;">📝 메모</button>
     <div id="authArea">
       <span id="authStatus" class="mono" style="color:var(--ink-muted);"></span>
       <button class="btn small" id="loginBtn">로그인</button>
@@ -435,6 +436,30 @@
     <div class="modal-actions">
       <button class="btn" id="loginCancelBtn">닫기</button>
       <button class="btn primary" id="loginSubmitBtn">로그인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 메모 모달 -->
+<div class="modal-backdrop" id="memoModal">
+  <div class="modal" style="width:min(480px,92vw);max-height:82vh;overflow-y:auto;">
+    <h3>메모</h3>
+    <div id="memoAddArea" style="display:none;margin-bottom:18px;">
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input type="text" id="memoDate" inputmode="numeric" placeholder="YYYYMMDD" maxlength="10"
+          style="flex:1;min-width:0;background:#fff;border:2px solid var(--rule-strong);color:var(--ink);padding:9px 10px;border-radius:12px;font-family:'Gowun Dodum', sans-serif;font-size:13px;">
+        <input type="time" id="memoTime"
+          style="flex:1;min-width:0;background:#fff;border:2px solid var(--rule-strong);color:var(--ink);padding:9px 10px;border-radius:12px;font-family:'Gowun Dodum', sans-serif;font-size:13px;">
+      </div>
+      <textarea id="memoContent" placeholder="내용을 입력하세요" rows="3"
+        style="width:100%;background:#fff;border:2px solid var(--rule-strong);color:var(--ink);padding:9px 10px;font-size:13px;font-family:'Gowun Dodum', sans-serif;border-radius:12px;resize:vertical;"></textarea>
+      <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+        <button type="button" class="btn small primary" id="memoSaveBtn">메모 저장</button>
+      </div>
+    </div>
+    <div id="memoListArea"></div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn" id="memoCloseBtn">닫기</button>
     </div>
   </div>
 </div>
@@ -812,6 +837,7 @@ onAuthStateChanged(auth, (user)=>{
   }
   authResolvedOnce = true;
   renderTable(); // 소유자 여부에 따라 수정/삭제 버튼 표시가 달라짐
+  renderMemoList(); // 메모 작성/삭제 버튼 표시도 소유자 여부에 따라 갱신
 });
 
 // 매매 기록 정렬 기준: 날짜 → (입력했다면) 시간 → 등록순서(createdAt)
@@ -1557,6 +1583,123 @@ tradeForm.addEventListener('submit', async (e)=>{
     console.error(e);
     toast('저장 실패: 권한 또는 네트워크를 확인하세요');
   }
+});
+
+// ---------- 메모 ----------
+const memoBtn = document.getElementById('memoBtn');
+const memoModal = document.getElementById('memoModal');
+const memoCloseBtn = document.getElementById('memoCloseBtn');
+const memoAddArea = document.getElementById('memoAddArea');
+const memoDateInput = document.getElementById('memoDate');
+const memoTimeInput = document.getElementById('memoTime');
+const memoContentInput = document.getElementById('memoContent');
+const memoSaveBtn = document.getElementById('memoSaveBtn');
+const memoListArea = document.getElementById('memoListArea');
+
+let memos = [];
+
+function formatDateDigits(el){
+  const digits = el.value.replace(/[^0-9]/g,'').slice(0,8);
+  let formatted = digits;
+  if(digits.length > 4) formatted = digits.slice(0,4) + '-' + digits.slice(4);
+  if(digits.length > 6) formatted = digits.slice(0,4) + '-' + digits.slice(4,6) + '-' + digits.slice(6);
+  el.value = formatted;
+}
+memoDateInput.addEventListener('input', ()=> formatDateDigits(memoDateInput));
+
+function openMemoModal(){
+  memoAddArea.style.display = currentUser ? 'block' : 'none';
+  memoDateInput.value = todayStr();
+  memoTimeInput.value = nowTimeStr();
+  memoContentInput.value = '';
+  memoModal.classList.add('visible');
+}
+function closeMemoModal(){
+  memoModal.classList.remove('visible');
+}
+memoBtn.addEventListener('click', openMemoModal);
+memoCloseBtn.addEventListener('click', closeMemoModal);
+memoModal.addEventListener('click', (e)=>{
+  if(e.target === memoModal) closeMemoModal();
+});
+
+function renderMemoList(){
+  if(!memos.length){
+    memoListArea.innerHTML = `<div style="text-align:center;color:var(--ink-muted);padding:24px 0;font-size:13px;">아직 메모가 없습니다.</div>`;
+    return;
+  }
+  const sorted = [...memos].sort((a,b)=>{
+    if(a.date !== b.date) return a.date < b.date ? 1 : -1;
+    const at = a.time || '';
+    const bt = b.time || '';
+    if(at !== bt) return at < bt ? 1 : -1;
+    const act = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+    const bct = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+    return bct - act;
+  });
+  memoListArea.innerHTML = sorted.map(m=>{
+    const delBtn = currentUser
+      ? `<button data-memo-del="${m.id}" style="background:none;border:none;color:var(--ink-muted);cursor:pointer;font-size:12px;text-decoration:underline;font-family:'Gowun Dodum', sans-serif;padding:0;">삭제</button>`
+      : '';
+    return `<div style="border-bottom:1px solid var(--rule);padding:12px 0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-size:12px;color:var(--ink-muted);">${m.date}${m.time ? ' ' + escapeHtml(m.time) : ''}</span>
+        ${delBtn}
+      </div>
+      <div style="font-size:14px;white-space:pre-wrap;">${escapeHtml(m.content)}</div>
+    </div>`;
+  }).join('');
+
+  memoListArea.querySelectorAll('[data-memo-del]').forEach(btn=>{
+    btn.addEventListener('click', ()=> deleteMemo(btn.getAttribute('data-memo-del')));
+  });
+}
+
+async function deleteMemo(id){
+  if(!currentUser) return;
+  if(!confirm('이 메모를 삭제할까요?')) return;
+  try{
+    await deleteDoc(doc(db,'memos',id));
+    toast('삭제되었습니다');
+  }catch(e){
+    console.error(e);
+    toast('삭제 실패: 권한을 확인하세요');
+  }
+}
+
+memoSaveBtn.addEventListener('click', async ()=>{
+  if(!currentUser){ toast('로그인이 필요합니다'); return; }
+  const dateVal = memoDateInput.value;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(dateVal)){
+    toast('날짜를 YYYYMMDD 형식으로 정확히 입력하세요');
+    return;
+  }
+  const content = memoContentInput.value.trim();
+  if(!content){ toast('내용을 입력하세요'); return; }
+  try{
+    await addDoc(collection(db, 'memos'), {
+      date: dateVal,
+      time: memoTimeInput.value || '',
+      content,
+      createdAt: serverTimestamp()
+    });
+    memoDateInput.value = todayStr();
+    memoTimeInput.value = nowTimeStr();
+    memoContentInput.value = '';
+    toast('메모가 저장되었습니다');
+  }catch(e){
+    console.error(e);
+    toast('저장 실패: 권한 또는 네트워크를 확인하세요');
+  }
+});
+
+const memosCol = collection(db, 'memos');
+onSnapshot(memosCol, (snap)=>{
+  memos = [];
+  snap.forEach(d => memos.push({ id:d.id, ...d.data() }));
+  renderMemoList();
+}, (err)=>{
+  console.error(err);
 });
 </script>
 </body>
