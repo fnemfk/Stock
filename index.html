@@ -488,6 +488,10 @@
         <label for="fDate">날짜</label>
         <input type="text" id="fDate" inputmode="numeric" placeholder="YYYYMMDD" maxlength="10" required>
       </div>
+      <div class="field span2">
+        <label for="fTime">시간 (선택, 같은 날짜 순서 조정용)</label>
+        <input type="time" id="fTime">
+      </div>
       <div class="field span2" style="position:relative;">
         <label for="fTicker">종목명</label>
         <input type="text" id="fTicker" placeholder="종목명 입력 (예: 삼성전자)" autocomplete="off" required>
@@ -810,12 +814,27 @@ onAuthStateChanged(auth, (user)=>{
   renderTable(); // 소유자 여부에 따라 수정/삭제 버튼 표시가 달라짐
 });
 
+// 매매 기록 정렬 기준: 날짜 → (입력했다면) 시간 → 등록순서(createdAt)
+// 시간을 넣지 않은 기록끼리는 등록한 순서 그대로 유지됩니다.
+function compareTrades(a, b){
+  if(a.date !== b.date) return a.date < b.date ? -1 : 1;
+  const at = a.time || '';
+  const bt = b.time || '';
+  if(at && bt && at !== bt) return at < bt ? -1 : 1;
+  if(at && !bt) return -1;
+  if(!at && bt) return 1;
+  const act = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+  const bct = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+  return act - bct;
+}
+
 // ---------- Firestore live data ----------
 const tradesCol = collection(db, 'trades');
-const tradesQuery = query(tradesCol, orderBy('date', 'asc'), orderBy('createdAt', 'asc'));
+const tradesQuery = query(tradesCol, orderBy('date', 'asc'));
 onSnapshot(tradesQuery, (snap)=>{
   trades = [];
   snap.forEach(d => trades.push({ id:d.id, ...d.data() }));
+  trades.sort(compareTrades);
   computeAndRender();
 }, (err)=>{
   console.error(err);
@@ -1232,13 +1251,8 @@ function renderTable(){
     document.getElementById('pagination').innerHTML = '';
     return;
   }
-  // 날짜순 정렬 (최신 날짜가 위로, 같은 날짜면 나중에 등록한 기록이 위로)
-  let rows = [...trades].sort((a,b)=>{
-    if(a.date !== b.date) return b.date.localeCompare(a.date);
-    const at = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
-    const bt = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
-    return bt - at;
-  });
+  // 날짜순 정렬 (최신 날짜가 위로), 같은 날짜 안에서는 시간/등록순서 기준
+  let rows = [...trades].sort((a,b)=> compareTrades(b,a));
 
   // 날짜 검색 필터
   if(dateSearchValue){
@@ -1342,12 +1356,7 @@ tickerModal.addEventListener('click', (e)=>{
 function openTickerDetail(ticker){
   const rows = trades
     .filter(t => t.ticker === ticker)
-    .sort((a,b)=>{
-      if(a.date !== b.date) return b.date.localeCompare(a.date);
-      const at = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
-      const bt = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
-      return bt - at;
-    });
+    .sort((a,b)=> compareTrades(b,a));
 
   const sells = rows.filter(t=>t.type==='sell');
   const realizedSum = sells.reduce((s,t)=> s + (t.realizedPL||0), 0);
@@ -1403,6 +1412,7 @@ const FEE_RATE_SELL = 0.0043319;  // 매도 수수료율(%)
 const TAX_RATE_SELL = 0.20;       // 매도 세금(%) - 증권사 실제 평가손익과 비교해 보정한 값
 
 const fDateInput = document.getElementById('fDate');
+const fTimeInput = document.getElementById('fTime');
 const fQtyInput = document.getElementById('fQty');
 const fPriceInput = document.getElementById('fPrice');
 const fTypeInput = document.getElementById('fType');
@@ -1414,6 +1424,13 @@ function todayStr(){
   const m = String(d.getMonth()+1).padStart(2,'0');
   const day = String(d.getDate()).padStart(2,'0');
   return `${y}-${m}-${day}`;
+}
+
+function nowTimeStr(){
+  const d = new Date();
+  const h = String(d.getHours()).padStart(2,'0');
+  const m = String(d.getMinutes()).padStart(2,'0');
+  return `${h}:${m}`;
 }
 
 // 날짜: 숫자만 입력해도 YYYY-MM-DD 형태로 자동 변환 (예: 20260818 -> 2026-08-18)
@@ -1460,6 +1477,7 @@ function resetForm(){
   document.getElementById('editId').value = '';
   document.getElementById('fFee').value = 0;
   fDateInput.value = todayStr(); // 날짜는 오늘 날짜를 기본값으로
+  fTimeInput.value = nowTimeStr(); // 시간은 현재 시각을 기본값으로 (필요 없으면 지워도 됨)
   submitBtn.textContent = '기록 저장';
   cancelEditBtn.style.display = 'none';
 }
@@ -1468,12 +1486,14 @@ cancelEditBtn.addEventListener('click', ()=>{
   closeAddTradeModal();
 });
 fDateInput.value = todayStr(); // 최초 로드 시에도 오늘 날짜로 채워둠
+fTimeInput.value = nowTimeStr();
 
 function startEdit(id){
   const t = trades.find(x=>x.id===id);
   if(!t) return;
   document.getElementById('editId').value = t.id;
   document.getElementById('fDate').value = t.date;
+  document.getElementById('fTime').value = t.time || '';
   document.getElementById('fTicker').value = t.ticker;
   document.getElementById('fType').value = t.type;
   document.getElementById('fQty').value = t.quantity;
@@ -1510,6 +1530,7 @@ tradeForm.addEventListener('submit', async (e)=>{
 
   const payload = {
     date: dateVal,
+    time: document.getElementById('fTime').value || '',
     ticker: document.getElementById('fTicker').value.trim(),
     type: document.getElementById('fType').value,
     quantity: Number(document.getElementById('fQty').value),
