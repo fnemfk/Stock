@@ -150,7 +150,7 @@
 
   /* ---------- Stat cards ---------- */
   .stats{
-    display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
   }
   .stat{
     background:var(--panel);
@@ -325,12 +325,8 @@
       <div class="label">총자산</div>
       <div class="value mono" id="statTotalAssets">조회중...</div>
     </div>
-    <div class="stat">
-      <div class="label">평균 손익</div>
-      <div class="value mono" id="statAvgPL">0</div>
-    </div>
   </div>
-  <div style="font-size:11px;color:var(--ink-muted);margin-top:8px;">평가금액·총자산은 네이버 금융 시세 기준이며, 총자산 = 총 실현손익 + 평가금액 (현금은 포함되지 않습니다)</div>
+  <div style="font-size:11px;color:var(--ink-muted);margin-top:8px;">평가금액은 네이버 금융 시세 기준이며, 총자산 = 원금 + 총 실현손익 + 총 평가손익 (원금 미설정 시 표시되지 않습니다)</div>
 
   <!-- 탭 전환 -->
   <div class="tab-nav">
@@ -955,6 +951,7 @@ let lastSells = [];
 let periodMode = 'daily';
 let investedAmount = 0;
 let totalPLGlobal = 0;
+let totalValuationPLGlobal = 0; // 보유종목 미실현(평가) 손익 합계 - 시세 조회된 종목만 반영
 
 function computeAndRender(){
   const { enriched, cumSeries, totalPL, holdings } = computeMetrics(trades);
@@ -962,7 +959,6 @@ function computeAndRender(){
 
   const sells = enriched.filter(t=>t.type==='sell');
   lastSells = sells;
-  const avgPL = sells.length ? totalPL/sells.length : 0;
   const totalCostBasis = sells.reduce((s,t)=> s + (t.costBasis||0), 0);
 
   // 현재 보유 중인 종목들의 매입원가 합계 (지금 얼마가 물려있는지)
@@ -974,8 +970,6 @@ function computeAndRender(){
 
   document.getElementById('statTotalPL').textContent = fmt(totalPL) + fmtPct(totalPL, totalCostBasis);
   document.getElementById('statTotalPL').className = 'value mono ' + (totalPL>0?'gain':totalPL<0?'loss':'');
-  document.getElementById('statAvgPL').textContent = fmt(avgPL);
-  document.getElementById('statAvgPL').className = 'value mono ' + (avgPL>0?'gain':avgPL<0?'loss':'');
 
   renderCharts(sells);
   renderPeriodTable(lastSells);
@@ -1190,12 +1184,12 @@ function renderHoldings(holdings, totalPL){
 
   const tbody = document.getElementById('holdingsTableBody');
   const statValuation = document.getElementById('statValuation');
-  const statTotalAssets = document.getElementById('statTotalAssets');
 
   if(!rows.length){
     tbody.innerHTML = `<tr class="empty-row"><td colspan="6">현재 보유 중인 종목이 없습니다.</td></tr>`;
     statValuation.textContent = fmt(0);
-    statTotalAssets.textContent = fmt(totalPL);
+    totalValuationPLGlobal = 0;
+    updateTotalAssetsDisplay();
     return;
   }
 
@@ -1204,6 +1198,7 @@ function renderHoldings(holdings, totalPL){
 
   function draw(priceMap, fetchError){
     let totalValuation = 0;
+    let totalValuationPL = 0;
     tbody.innerHTML = rows.map(([ticker, h])=>{
       const qty = Math.round(h.qty);
       const code = STOCK_CODES[ticker];
@@ -1217,6 +1212,7 @@ function renderHoldings(holdings, totalPL){
       const valuationPL = currentPrice !== null
         ? (currentPrice * qty) - (h.avgCostBasis * qty) - estSellCost
         : null;
+      if(valuationPL !== null) totalValuationPL += valuationPL;
 
       let priceCell;
       if(currentPrice !== null){
@@ -1247,9 +1243,8 @@ function renderHoldings(holdings, totalPL){
     });
 
     statValuation.textContent = fmt(totalValuation);
-    statTotalAssets.textContent = fmt(totalPL + totalValuation);
-    const totalAssets = totalPL + totalValuation;
-    statTotalAssets.className = 'value mono ' + (totalAssets>0?'gain':totalAssets<0?'loss':'');
+    totalValuationPLGlobal = totalValuationPL;
+    updateTotalAssetsDisplay();
   }
 
   draw({}, false); // 매입단가 기준으로 우선 표시 (조회 지연 대비)
@@ -1257,6 +1252,20 @@ function renderHoldings(holdings, totalPL){
   if(codes.length){
     fetchCurrentPrices(codes).then(({prices, error})=> draw(prices, error));
   }
+}
+
+// 총자산 = 원금 + 총 실현손익 + 총 평가손익 (원금 미설정 시 계산 불가하므로 안내 문구 표시)
+function updateTotalAssetsDisplay(){
+  const statTotalAssets = document.getElementById('statTotalAssets');
+  if(!statTotalAssets) return;
+  if(principalValue === null){
+    statTotalAssets.textContent = '원금을 설정해주세요';
+    statTotalAssets.className = 'value mono';
+    return;
+  }
+  const totalAssets = principalValue + totalPLGlobal + totalValuationPLGlobal;
+  statTotalAssets.textContent = fmt(totalAssets);
+  statTotalAssets.className = 'value mono ' + (totalAssets>principalValue?'gain':totalAssets<principalValue?'loss':'');
 }
 
 let chartMode = 'daily'; // 'daily' | 'cumulative'
@@ -1831,6 +1840,7 @@ function renderPrincipalArea(){
 onSnapshot(principalDocRef, (snap)=>{
   principalValue = snap.exists() ? (snap.data().amount ?? null) : null;
   renderPrincipalArea();
+  updateTotalAssetsDisplay();
 }, (err)=>{
   console.error(err);
 });
