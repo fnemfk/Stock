@@ -150,7 +150,7 @@
 
   /* ---------- Stat cards ---------- */
   .stats{
-    display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+    display:grid;grid-template-columns:repeat(2,1fr);gap:14px;
   }
   .stat{
     background:var(--panel);
@@ -318,15 +318,11 @@
       <div class="value mono" id="statTotalPL">0</div>
     </div>
     <div class="stat">
-      <div class="label">평가금액</div>
-      <div class="value mono" id="statValuation">조회중...</div>
-    </div>
-    <div class="stat">
       <div class="label">총자산</div>
       <div class="value mono" id="statTotalAssets">조회중...</div>
     </div>
   </div>
-  <div style="font-size:11px;color:var(--ink-muted);margin-top:8px;">평가금액은 보유종목 시세 합산액, 총자산은 원금 기준 손익 반영 가치입니다</div>
+  <div style="font-size:11px;color:var(--ink-muted);margin-top:8px;">총자산은 원금 기준 손익 반영 가치입니다</div>
 
   <!-- 탭 전환 -->
   <div class="tab-nav">
@@ -1183,11 +1179,9 @@ function renderHoldings(holdings, totalPL){
     .sort((a,b) => a[0].localeCompare(b[0], 'ko'));
 
   const tbody = document.getElementById('holdingsTableBody');
-  const statValuation = document.getElementById('statValuation');
 
   if(!rows.length){
     tbody.innerHTML = `<tr class="empty-row"><td colspan="6">현재 보유 중인 종목이 없습니다.</td></tr>`;
-    statValuation.textContent = fmt(0);
     totalValuationPLGlobal = 0;
     updateTotalAssetsDisplay();
     return;
@@ -1242,7 +1236,6 @@ function renderHoldings(holdings, totalPL){
       el.addEventListener('click', ()=> openTickerDetail(el.dataset.ticker));
     });
 
-    statValuation.textContent = fmt(totalValuation);
     totalValuationPLGlobal = totalValuationPL;
     updateTotalAssetsDisplay();
   }
